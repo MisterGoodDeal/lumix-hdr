@@ -3,6 +3,7 @@ import { Spinner, Tabs, Toast } from "@heroui/react";
 
 import { ConnectionScreen } from "./screens/ConnectionScreen";
 import { PlaceholderScreen } from "./screens/PlaceholderScreen";
+import { ResultScreen } from "./screens/ResultScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { useAppStore } from "./store/app-store";
 import type { Screen } from "./types";
@@ -72,10 +73,7 @@ export default function App() {
               />
             </Tabs.Panel>
             <Tabs.Panel id="resultat">
-              <PlaceholderScreen
-                title="Résultat"
-                description="La comparaison avant/après et la fusion HDR arriveront à la phase 2."
-              />
+              <ResultScreen />
             </Tabs.Panel>
             <Tabs.Panel id="historique">
               <PlaceholderScreen
