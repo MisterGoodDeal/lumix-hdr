@@ -39,7 +39,12 @@ pub fn run() {
             commands::get_app_status,
             commands::set_demo_mode,
             commands::set_log_level,
-            commands::get_log_dir
+            commands::get_log_dir,
+            commands::set_fusion_options,
+            commands::list_jpeg_folder,
+            commands::merge_image_folder,
+            commands::cancel_fusion,
+            commands::open_path
         ]);
 
     if let Err(error) = builder.run(tauri::generate_context!()) {
