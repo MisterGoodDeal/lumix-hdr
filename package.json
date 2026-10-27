@@ -1,0 +1,20 @@
+{
+  "name": "lumix-hdr",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "yarn@1.22.22",
+  "workspaces": [
+    "ui"
+  ],
+  "scripts": {
+    "dev": "yarn workspace ui dev",
+    "build": "yarn workspace ui build",
+    "lint": "yarn workspace ui lint",
+    "typecheck": "yarn workspace ui typecheck",
+    "test": "yarn workspace ui test",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.9.6"
+  }
+}
