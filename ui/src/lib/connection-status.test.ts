@@ -5,7 +5,7 @@ import {
   connectionStatusLabel,
   osLabel,
 } from "./connection-status";
-import type { AppStatus } from "../types";
+import { DEFAULT_FUSION_OPTIONS, type AppStatus } from "../types";
 
 function status(overrides: Partial<AppStatus> = {}): AppStatus {
   return {
@@ -16,6 +16,7 @@ function status(overrides: Partial<AppStatus> = {}): AppStatus {
     camera_available: false,
     log_level: "info",
     log_dir: "/tmp/logs",
+    fusion: DEFAULT_FUSION_OPTIONS,
     ...overrides,
   };
 }
