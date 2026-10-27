@@ -1,0 +1,23 @@
+# Rust
+/target
+
+# Node
+node_modules
+dist
+.vite
+
+# SDK Panasonic (licence non vérifiée, ne jamais committer)
+/vendor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Tauri (généré à la compilation)
+src-tauri/gen
+
+# IDE
+.idea
