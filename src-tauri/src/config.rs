@@ -2,6 +2,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
 
+use hdr_core::FusionOptions;
 use serde::{Deserialize, Serialize};
 
 pub const CONFIG_VERSION: u32 = 1;
@@ -31,13 +32,15 @@ impl LogLevel {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AppConfig {
     pub version: u32,
     #[serde(default)]
     pub demo_mode: bool,
     #[serde(default)]
     pub log_level: LogLevel,
+    #[serde(default)]
+    pub fusion: FusionOptions,
 }
 
 impl Default for AppConfig {
@@ -46,6 +49,7 @@ impl Default for AppConfig {
             version: CONFIG_VERSION,
             demo_mode: false,
             log_level: LogLevel::Info,
+            fusion: FusionOptions::default(),
         }
     }
 }
@@ -170,6 +174,7 @@ mod tests {
             version: CONFIG_VERSION,
             demo_mode: true,
             log_level: LogLevel::Debug,
+            fusion: FusionOptions::default(),
         };
         save_to_path(&path, &config).expect("écriture");
         assert!(path.exists());
@@ -188,6 +193,7 @@ mod tests {
             version: CONFIG_VERSION,
             demo_mode: true,
             log_level: LogLevel::Warn,
+            fusion: FusionOptions::default(),
         };
         save_to_path(&path, &updated).expect("remplacement");
         let loaded = load_from_path(&path).expect("relecture");
@@ -222,6 +228,13 @@ mod tests {
     }
 
     #[test]
+    fn missing_fusion_uses_default() {
+        let config =
+            parse_config(r#"{"version": 1, "demo_mode": false}"#).expect("config minimale");
+        assert_eq!(config.fusion, FusionOptions::default());
+    }
+
+    #[test]
     fn env_one_forces_demo() {
         let config = AppConfig::default();
         assert!(resolve_demo_mode(&config, Some("1")));
@@ -236,6 +249,7 @@ mod tests {
             version: CONFIG_VERSION,
             demo_mode: true,
             log_level: LogLevel::Info,
+            fusion: FusionOptions::default(),
         };
         assert!(resolve_demo_mode(&config, Some("0")));
         assert!(resolve_demo_mode(&config, None));
