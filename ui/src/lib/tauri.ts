@@ -1,6 +1,15 @@
-import { invoke } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { open } from "@tauri-apps/plugin-dialog";
 
-import type { AppError, AppStatus, LogLevel } from "../types";
+import type {
+  AppError,
+  AppStatus,
+  FusionOptions,
+  FusionOutputs,
+  LogLevel,
+} from "../types";
+import { DEFAULT_FUSION_OPTIONS } from "../types";
 
 const MOCK_STATUS: AppStatus = {
   version: "0.1.0",
@@ -10,6 +19,7 @@ const MOCK_STATUS: AppStatus = {
   camera_available: false,
   log_level: "info",
   log_dir: "(navigateur — hors application Tauri)",
+  fusion: DEFAULT_FUSION_OPTIONS,
 };
 
 export function isTauri(): boolean {
@@ -75,4 +85,93 @@ export async function getLogDir(): Promise<string> {
     return MOCK_STATUS.log_dir;
   }
   return call<string>("get_log_dir");
+}
+
+export async function setFusionOptions(
+  options: FusionOptions,
+): Promise<AppStatus> {
+  if (!isTauri()) {
+    return { ...MOCK_STATUS, fusion: options };
+  }
+  return call<AppStatus>("set_fusion_options", { options });
+}
+
+export async function pickImageFolder(): Promise<string | null> {
+  if (!isTauri()) {
+    return "/demo/bracket";
+  }
+  const selected = await open({
+    directory: true,
+    multiple: false,
+    title: "Choisir un dossier de JPEG",
+  });
+  if (typeof selected === "string" && selected.length > 0) {
+    return selected;
+  }
+  return null;
+}
+
+export async function listJpegFolder(dir: string): Promise<string[]> {
+  if (!isTauri()) {
+    return [
+      `${dir}/img-1.jpg`,
+      `${dir}/img-2.jpg`,
+      `${dir}/img-3.jpg`,
+    ];
+  }
+  return call<string[]>("list_jpeg_folder", { dir });
+}
+
+export async function mergeImageFolder(
+  dir: string,
+  options: FusionOptions,
+): Promise<FusionOutputs> {
+  if (!isTauri()) {
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, 350);
+    });
+    return {
+      jpeg: `${dir}/hdr-fused.jpg`,
+      tiff: options.output_tiff ? `${dir}/hdr-fused.tiff` : null,
+      image_count: 3,
+      method: options.method,
+      aligned: options.align,
+    };
+  }
+  return call<FusionOutputs>("merge_image_folder", { dir, options });
+}
+
+export async function cancelFusion(): Promise<void> {
+  if (!isTauri()) {
+    return;
+  }
+  await call<void>("cancel_fusion");
+}
+
+export async function openPath(path: string): Promise<void> {
+  if (!isTauri()) {
+    return;
+  }
+  await call<void>("open_path", { path });
+}
+
+export function previewSrc(path: string | null): string | null {
+  if (!path) {
+    return null;
+  }
+  if (!isTauri()) {
+    return null;
+  }
+  return convertFileSrc(path);
+}
+
+export async function onFusionProgress(
+  handler: (value: number) => void,
+): Promise<UnlistenFn> {
+  if (!isTauri()) {
+    return () => undefined;
+  }
+  return listen<number>("fusion-progress", (event) => {
+    handler(event.payload);
+  });
 }
