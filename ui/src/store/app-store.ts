@@ -5,9 +5,16 @@ import {
   getAppStatus,
   parseAppError,
   setDemoMode as persistDemoMode,
+  setFusionOptions as persistFusionOptions,
   setLogLevel as persistLogLevel,
 } from "../lib/tauri";
-import type { AppError, AppStatus, LogLevel, Screen } from "../types";
+import type {
+  AppError,
+  AppStatus,
+  FusionOptions,
+  LogLevel,
+  Screen,
+} from "../types";
 
 type AppState = {
   status: AppStatus | null;
@@ -19,6 +26,7 @@ type AppState = {
   setScreen: (screen: Screen) => void;
   setDemoMode: (enabled: boolean) => Promise<void>;
   setLogLevel: (level: LogLevel) => Promise<void>;
+  setFusionOptions: (options: FusionOptions) => Promise<void>;
   connectDemo: () => void;
 };
 
@@ -68,6 +76,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   setLogLevel: async (level) => {
     try {
       const status = await persistLogLevel(level);
+      set({ status, error: null });
+    } catch (cause) {
+      const error = parseAppError(cause);
+      set({ error });
+      showError(error);
+    }
+  },
+  setFusionOptions: async (options) => {
+    try {
+      const status = await persistFusionOptions(options);
       set({ status, error: null });
     } catch (cause) {
       const error = parseAppError(cause);
