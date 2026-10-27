@@ -17,3 +17,28 @@ commands.allow = ["set_log_level"]
 identifier = "allow-get-log-dir"
 description = "Autorise la lecture du dossier des journaux"
 commands.allow = ["get_log_dir"]
+
+[[permission]]
+identifier = "allow-set-fusion-options"
+description = "Autorise la mise à jour des options de fusion HDR"
+commands.allow = ["set_fusion_options"]
+
+[[permission]]
+identifier = "allow-list-jpeg-folder"
+description = "Autorise la liste des JPEG d'un dossier"
+commands.allow = ["list_jpeg_folder"]
+
+[[permission]]
+identifier = "allow-merge-image-folder"
+description = "Autorise la fusion HDR d'un dossier d'images"
+commands.allow = ["merge_image_folder"]
+
+[[permission]]
+identifier = "allow-cancel-fusion"
+description = "Autorise l'annulation d'une fusion en cours"
+commands.allow = ["cancel_fusion"]
+
+[[permission]]
+identifier = "allow-open-path"
+description = "Autorise l'ouverture d'un dossier ou fichier dans l'explorateur"
+commands.allow = ["open_path"]
