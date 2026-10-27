@@ -1,0 +1,19 @@
+[[permission]]
+identifier = "allow-get-app-status"
+description = "Autorise la lecture de l'état de l'application"
+commands.allow = ["get_app_status"]
+
+[[permission]]
+identifier = "allow-set-demo-mode"
+description = "Autorise l'activation ou la désactivation du mode démo"
+commands.allow = ["set_demo_mode"]
+
+[[permission]]
+identifier = "allow-set-log-level"
+description = "Autorise le changement du niveau de journalisation"
+commands.allow = ["set_log_level"]
+
+[[permission]]
+identifier = "allow-get-log-dir"
+description = "Autorise la lecture du dossier des journaux"
+commands.allow = ["get_log_dir"]

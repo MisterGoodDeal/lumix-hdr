@@ -1,0 +1,24 @@
+[package]
+name = "lumix-hdr"
+version.workspace = true
+description = "Bracketing d'exposition et fusion HDR pour Panasonic LUMIX GH6"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "lumix_hdr_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+tauri = { version = "2.12.5", features = [] }
+tauri-plugin-dialog = "2.8.3"
+thiserror = "2.0.17"
+tracing = "0.1.41"
+tracing-appender = "0.2.3"
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }

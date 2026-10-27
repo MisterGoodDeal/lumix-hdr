@@ -1,0 +1,13 @@
+{
+  "identifier": "default",
+  "description": "Capacité de la fenêtre principale",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    "allow-get-app-status",
+    "allow-set-demo-mode",
+    "allow-set-log-level",
+    "allow-get-log-dir"
+  ]
+}
