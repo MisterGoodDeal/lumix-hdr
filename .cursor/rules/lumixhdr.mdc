@@ -1,0 +1,11 @@
+---
+description: Contexte LumixHDR — phases, interdits, reprise Windows
+alwaysApply: true
+---
+
+Lis `AGENTS.md` à la racine avant toute modification. C’est la source de reprise.
+
+- Réponds en français. Yarn, pas pnpm. Tauri 2.12, OpenCV 4, pas de SDK avant la phase 4.
+- Aucun `unwrap`/`expect` hors tests. N’invente jamais l’API LUMIX. Ne committe pas `vendor/`.
+- Phase 1–2 faites. Sur Windows : faire tourner la fusion OpenCV, puis phase 3 (`MockCamera` + `capture`), pas le SDK.
+- Le GH6 invisible est normal : `camera_available` est `cfg!(windows)` et aucun SDK n’est chargé.
