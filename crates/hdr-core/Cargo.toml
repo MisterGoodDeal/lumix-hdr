@@ -1,0 +1,19 @@
+[package]
+name = "hdr-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Alignement et fusion HDR locale (OpenCV)"
+
+[dependencies]
+kamadak-exif = "0.6.1"
+opencv = { version = "0.101.1", default-features = false, features = [
+    "clang-runtime",
+    "imgcodecs",
+    "imgproc",
+    "photo",
+] }
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.17"
+tracing = "0.1.41"
