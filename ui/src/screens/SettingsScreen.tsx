@@ -9,8 +9,9 @@ import {
 } from "@heroui/react";
 
 import { ErrorDetails } from "../components/ErrorDetails";
+import { fusionMethodLabel } from "../lib/fusion";
 import { useAppStore } from "../store/app-store";
-import type { LogLevel } from "../types";
+import type { FusionMethod, LogLevel } from "../types";
 
 const LOG_LEVELS: { id: LogLevel; label: string }[] = [
   { id: "error", label: "Erreur" },
@@ -25,6 +26,7 @@ export function SettingsScreen() {
   const error = useAppStore((state) => state.error);
   const setDemoMode = useAppStore((state) => state.setDemoMode);
   const setLogLevel = useAppStore((state) => state.setLogLevel);
+  const setFusionOptions = useAppStore((state) => state.setFusionOptions);
 
   if (!status) {
     return (
@@ -96,6 +98,84 @@ export function SettingsScreen() {
             </ListBox>
           </Select.Popover>
         </Select>
+
+        <Switch
+          isSelected={status.fusion.align}
+          onChange={(align) => {
+            void setFusionOptions({ ...status.fusion, align });
+          }}
+        >
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            Aligner avant fusion
+          </Switch.Content>
+        </Switch>
+        <Description>
+          AlignMTB corrige les petits décalages de trépied. Désactivez-le si
+          les images sont déjà parfaitement calées.
+        </Description>
+
+        <Select
+          selectedKey={status.fusion.method}
+          onSelectionChange={(key) => {
+            if (key === "mertens" || key === "debevec") {
+              void setFusionOptions({
+                ...status.fusion,
+                method: key as FusionMethod,
+              });
+            }
+          }}
+        >
+          <Label>Méthode de fusion par défaut</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {(["mertens", "debevec"] as const).map((method) => (
+                <ListBox.Item
+                  id={method}
+                  key={method}
+                  textValue={fusionMethodLabel(method)}
+                >
+                  {fusionMethodLabel(method)}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
+
+        <Switch
+          isSelected={status.fusion.output_jpeg}
+          onChange={(output_jpeg) => {
+            void setFusionOptions({ ...status.fusion, output_jpeg });
+          }}
+        >
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            Exporter un JPEG
+          </Switch.Content>
+        </Switch>
+
+        <Switch
+          isSelected={status.fusion.output_tiff}
+          onChange={(output_tiff) => {
+            void setFusionOptions({ ...status.fusion, output_tiff });
+          }}
+        >
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+            Exporter un TIFF 16 bits
+          </Switch.Content>
+        </Switch>
 
         <div className="flex flex-col gap-1">
           <Label>Dossier des journaux</Label>
