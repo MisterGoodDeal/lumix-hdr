@@ -7,4 +7,6 @@
 - Squelette de l’application Tauri 2 avec interface React, HeroUI et thème sombre.
 - Configuration JSON versionnée, mode démo (réglage et `LUMIX_HDR_DEMO=1`).
 - Journaux `tracing` (fichiers roulants) et hook de panic avec dialogue.
-- Intégration continue (fmt, clippy, tests Rust, lint / typecheck / tests UI).
+- Crate `hdr-core` : AlignMTB, MergeMertens, MergeDebevec optionnel, JPEG/TIFF atomiques, copie EXIF.
+- Commande Tauri « fusionner un dossier » avec progression et annulation, écran Résultat.
+- Intégration continue (fmt, clippy, tests Rust, OpenCV, lint / typecheck / tests UI).
