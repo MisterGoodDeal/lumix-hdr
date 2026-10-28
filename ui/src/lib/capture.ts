@@ -36,7 +36,11 @@ export async function startCapture(
       manifest_path: `/demo/sessions/2026-01-01_120000_${request.session_name}/manifest.json`,
       fused_jpeg: `/demo/sessions/2026-01-01_120000_${request.session_name}/hdr-fused.jpg`,
       state: { kind: "done" },
-      originals: [],
+      originals: Array.from(
+        { length: request.frame_count },
+        (_, index) =>
+          `/demo/sessions/2026-01-01_120000_${request.session_name}/frame-${index + 1}.jpg`,
+      ),
     };
   }
   return call<CaptureSessionResult>("start_capture", { request });
