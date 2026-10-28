@@ -10,12 +10,23 @@
     "allow-set-log-level",
     "allow-get-log-dir",
     "allow-set-fusion-options",
+    "allow-set-locale",
+    "allow-set-theme",
+    "allow-set-sessions-dir",
     "allow-list-jpeg-folder",
     "allow-merge-image-folder",
     "allow-cancel-fusion",
     "allow-open-path",
     "allow-preview-bracket-plan",
     "allow-start-capture",
-    "allow-cancel-capture"
+    "allow-cancel-capture",
+    "allow-list-cameras",
+    "allow-connect-camera",
+    "allow-disconnect-camera",
+    "allow-get-camera-settings",
+    "allow-set-camera-settings",
+    "allow-set-capture-defaults",
+    "allow-start-live-view",
+    "allow-stop-live-view"
   ]
 }

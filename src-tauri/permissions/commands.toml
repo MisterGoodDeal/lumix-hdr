@@ -24,6 +24,21 @@ description = "Autorise la mise à jour des options de fusion HDR"
 commands.allow = ["set_fusion_options"]
 
 [[permission]]
+identifier = "allow-set-locale"
+description = "Autorise le changement de langue de l'interface"
+commands.allow = ["set_locale"]
+
+[[permission]]
+identifier = "allow-set-theme"
+description = "Autorise le changement de thème de l'interface"
+commands.allow = ["set_theme"]
+
+[[permission]]
+identifier = "allow-set-sessions-dir"
+description = "Autorise le changement du dossier des séances HDR"
+commands.allow = ["set_sessions_dir"]
+
+[[permission]]
 identifier = "allow-list-jpeg-folder"
 description = "Autorise la liste des JPEG d'un dossier"
 commands.allow = ["list_jpeg_folder"]
@@ -57,3 +72,43 @@ commands.allow = ["start_capture"]
 identifier = "allow-cancel-capture"
 description = "Autorise l'annulation d'une prise de vue en cours"
 commands.allow = ["cancel_capture"]
+
+[[permission]]
+identifier = "allow-list-cameras"
+description = "Autorise la liste des appareils LUMIX PnP"
+commands.allow = ["list_cameras"]
+
+[[permission]]
+identifier = "allow-connect-camera"
+description = "Autorise la connexion à un appareil LUMIX"
+commands.allow = ["connect_camera"]
+
+[[permission]]
+identifier = "allow-disconnect-camera"
+description = "Autorise la déconnexion de l'appareil LUMIX"
+commands.allow = ["disconnect_camera"]
+
+[[permission]]
+identifier = "allow-get-camera-settings"
+description = "Autorise la lecture des réglages et capacités d'exposition"
+commands.allow = ["get_camera_settings"]
+
+[[permission]]
+identifier = "allow-set-camera-settings"
+description = "Autorise l'application des réglages ISO/ouverture/vitesse"
+commands.allow = ["set_camera_settings"]
+
+[[permission]]
+identifier = "allow-set-capture-defaults"
+description = "Autorise la sauvegarde des paramètres de bracketing"
+commands.allow = ["set_capture_defaults"]
+
+[[permission]]
+identifier = "allow-start-live-view"
+description = "Autorise le démarrage du Live View"
+commands.allow = ["start_live_view"]
+
+[[permission]]
+identifier = "allow-stop-live-view"
+description = "Autorise l'arrêt du Live View"
+commands.allow = ["stop_live_view"]

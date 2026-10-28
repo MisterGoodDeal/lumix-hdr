@@ -32,11 +32,11 @@ impl From<AppError> for ErrorPayload {
     fn from(error: AppError) -> Self {
         match &error {
             AppError::Config(inner) => ErrorPayload {
-                message: "La configuration n'a pas pu être lue ou enregistrée.".to_string(),
+                message: "Config illisible ou non enregistrée".to_string(),
                 detail: inner.to_string(),
             },
             AppError::Logging(inner) => ErrorPayload {
-                message: "Les journaux n'ont pas pu être mis à jour.".to_string(),
+                message: "Impossible de mettre à jour les logs".to_string(),
                 detail: inner.to_string(),
             },
             AppError::Hdr(inner) => ErrorPayload {
@@ -48,7 +48,7 @@ impl From<AppError> for ErrorPayload {
                 detail: inner.to_string(),
             },
             AppError::LockPoisoned => ErrorPayload {
-                message: "L'application a rencontré un état interne incohérent.".to_string(),
+                message: "État interne incohérent — redémarre l’app".to_string(),
                 detail: error.to_string(),
             },
             AppError::Message(message) => ErrorPayload {
@@ -61,29 +61,27 @@ impl From<AppError> for ErrorPayload {
 
 fn hdr_message(error: &HdrError) -> String {
     match error {
-        HdrError::NoImages => "Aucune image JPEG dans ce dossier.".to_string(),
-        HdrError::TooFewImages(_) => "Il faut au moins deux JPEG pour fusionner.".to_string(),
-        HdrError::Cancelled => "La fusion a été annulée.".to_string(),
-        HdrError::Inconsistent(_) => {
-            "Les images ne sont pas compatibles (taille ou canaux).".to_string()
-        }
-        HdrError::OpenCv(_) => "OpenCV n'a pas pu fusionner ces images.".to_string(),
-        HdrError::Io { .. } => "Un fichier n'a pas pu être lu ou écrit.".to_string(),
-        HdrError::Write { .. } => "Le fichier de sortie n'a pas pu être enregistré.".to_string(),
-        HdrError::Exif(_) => "Les métadonnées EXIF n'ont pas pu être recopiées.".to_string(),
+        HdrError::NoImages => "Pas de JPEG dans ce dossier".to_string(),
+        HdrError::TooFewImages(_) => "Il faut au moins deux JPEG".to_string(),
+        HdrError::Cancelled => "Fusion annulée".to_string(),
+        HdrError::Inconsistent(_) => "Images incompatibles (taille ou canaux)".to_string(),
+        HdrError::OpenCv(_) => "Échec de la fusion OpenCV".to_string(),
+        HdrError::Io { .. } => "Lecture ou écriture de fichier impossible".to_string(),
+        HdrError::Write { .. } => "Impossible d’écrire le fichier de sortie".to_string(),
+        HdrError::Exif(_) => "EXIF non recopié".to_string(),
     }
 }
 
 fn capture_message(error: &CaptureError) -> String {
     match error {
-        CaptureError::InvalidPlan(detail) => format!("Plan de bracketing invalide : {detail}"),
-        CaptureError::Cancelled => "La prise de vue a été annulée.".to_string(),
+        CaptureError::InvalidPlan(detail) => format!("Plan invalide : {detail}"),
+        CaptureError::Cancelled => "Prise de vue annulée".to_string(),
         CaptureError::Failed { step, source } => {
-            format!("Échec pendant {step:?} : {source}")
+            format!("Planté pendant {step:?} : {source}")
         }
-        CaptureError::Camera(inner) => format!("Erreur appareil : {inner}"),
+        CaptureError::Camera(inner) => format!("Erreur boîtier : {inner}"),
         CaptureError::Hdr(inner) => hdr_message(inner),
-        CaptureError::Io(_) => "Un fichier de session n'a pas pu être écrit.".to_string(),
+        CaptureError::Io(_) => "Impossible d’écrire la séance".to_string(),
         CaptureError::Message(message) => message.clone(),
     }
 }

@@ -41,13 +41,24 @@ pub fn run() {
             commands::set_log_level,
             commands::get_log_dir,
             commands::set_fusion_options,
+            commands::set_locale,
+            commands::set_theme,
+            commands::set_sessions_dir,
             commands::list_jpeg_folder,
             commands::merge_image_folder,
             commands::cancel_fusion,
             commands::open_path,
             commands::preview_bracket_plan,
             commands::start_capture,
-            commands::cancel_capture
+            commands::cancel_capture,
+            commands::list_cameras,
+            commands::connect_camera,
+            commands::disconnect_camera,
+            commands::get_camera_settings,
+            commands::set_camera_settings,
+            commands::set_capture_defaults,
+            commands::start_live_view,
+            commands::stop_live_view
         ]);
 
     if let Err(error) = builder.run(tauri::generate_context!()) {
@@ -57,8 +68,9 @@ pub fn run() {
 }
 
 fn setup_app(app: &tauri::AppHandle) -> Result<AppState, AppError> {
-    let (config_path, log_dir, sessions_dir) = commands::resolve_paths(app)?;
+    let (config_path, log_dir, default_sessions_dir) = commands::resolve_paths(app)?;
     let config = load_from_path(&config_path)?;
+    let sessions_dir = commands::resolve_sessions_dir(&config, &default_sessions_dir)?;
     let logging = logging::init(&log_dir, config.log_level)?;
     tracing::info!(
         version = env!("CARGO_PKG_VERSION"),
@@ -70,6 +82,7 @@ fn setup_app(app: &tauri::AppHandle) -> Result<AppState, AppError> {
     Ok(AppState::new(
         config_path,
         log_dir,
+        default_sessions_dir,
         sessions_dir,
         config,
         logging.filter,
@@ -86,9 +99,7 @@ fn install_panic_hook() {
             let detail = info.to_string();
             std::thread::spawn(move || {
                 app.dialog()
-                    .message(
-                        "LumixHDR a rencontré une erreur inattendue. Consultez les journaux pour le détail technique.",
-                    )
+                    .message("LumixHDR a planté — les détails sont dans les journaux")
                     .title("LumixHDR")
                     .kind(MessageDialogKind::Error)
                     .blocking_show();

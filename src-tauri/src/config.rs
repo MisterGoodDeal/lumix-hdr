@@ -32,6 +32,95 @@ impl LogLevel {
     }
 }
 
+/// Derniers paramètres de bracketing (écran Studio).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CaptureDefaults {
+    #[serde(default = "default_session_name")]
+    pub session_name: String,
+    #[serde(default = "default_frame_count")]
+    pub frame_count: u32,
+    #[serde(default = "default_step_ev")]
+    pub step_ev: f64,
+    #[serde(default)]
+    pub center_ev: f64,
+}
+
+fn default_session_name() -> String {
+    "hdr".to_string()
+}
+
+fn default_frame_count() -> u32 {
+    5
+}
+
+fn default_step_ev() -> f64 {
+    1.0
+}
+
+impl Default for CaptureDefaults {
+    fn default() -> Self {
+        Self {
+            session_name: default_session_name(),
+            frame_count: default_frame_count(),
+            step_ev: default_step_ev(),
+            center_ev: 0.0,
+        }
+    }
+}
+
+/// Derniers réglages manuels appliqués à l'appareil.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CameraDefaults {
+    #[serde(default = "default_iso")]
+    pub iso: u32,
+    #[serde(default = "default_aperture")]
+    pub aperture: f32,
+    #[serde(default = "default_shutter_seconds")]
+    pub shutter_seconds: f64,
+}
+
+fn default_iso() -> u32 {
+    200
+}
+
+fn default_aperture() -> f32 {
+    2.8
+}
+
+fn default_shutter_seconds() -> f64 {
+    1.0 / 60.0
+}
+
+impl Default for CameraDefaults {
+    fn default() -> Self {
+        Self {
+            iso: default_iso(),
+            aperture: default_aperture(),
+            shutter_seconds: default_shutter_seconds(),
+        }
+    }
+}
+
+/// Préférence de langue UI : système (défaut) ou forcée.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum LocalePreference {
+    #[default]
+    System,
+    En,
+    Fr,
+}
+
+/// Préférence de thème UI : système (défaut), sombre ou clair.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ThemePreference {
+    #[default]
+    System,
+    Dark,
+    Light,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AppConfig {
     pub version: u32,
@@ -40,7 +129,18 @@ pub struct AppConfig {
     #[serde(default)]
     pub log_level: LogLevel,
     #[serde(default)]
+    pub locale: LocalePreference,
+    #[serde(default)]
+    pub theme: ThemePreference,
+    /// Dossier des séances HDR. `None` = défaut (`app_data/sessions`).
+    #[serde(default)]
+    pub sessions_dir: Option<String>,
+    #[serde(default)]
     pub fusion: FusionOptions,
+    #[serde(default)]
+    pub capture: CaptureDefaults,
+    #[serde(default)]
+    pub camera: CameraDefaults,
 }
 
 impl Default for AppConfig {
@@ -49,7 +149,12 @@ impl Default for AppConfig {
             version: CONFIG_VERSION,
             demo_mode: false,
             log_level: LogLevel::Info,
+            locale: LocalePreference::System,
+            theme: ThemePreference::System,
+            sessions_dir: None,
             fusion: FusionOptions::default(),
+            capture: CaptureDefaults::default(),
+            camera: CameraDefaults::default(),
         }
     }
 }
@@ -174,7 +279,12 @@ mod tests {
             version: CONFIG_VERSION,
             demo_mode: true,
             log_level: LogLevel::Debug,
+            locale: LocalePreference::Fr,
+            theme: ThemePreference::Dark,
+            sessions_dir: None,
             fusion: FusionOptions::default(),
+            capture: CaptureDefaults::default(),
+            camera: CameraDefaults::default(),
         };
         save_to_path(&path, &config).expect("écriture");
         assert!(path.exists());
@@ -193,7 +303,21 @@ mod tests {
             version: CONFIG_VERSION,
             demo_mode: true,
             log_level: LogLevel::Warn,
+            locale: LocalePreference::En,
+            theme: ThemePreference::Light,
+            sessions_dir: Some(dir.join("custom-sessions").display().to_string()),
             fusion: FusionOptions::default(),
+            capture: CaptureDefaults {
+                session_name: "test".to_string(),
+                frame_count: 7,
+                step_ev: 1.0,
+                center_ev: 0.0,
+            },
+            camera: CameraDefaults {
+                iso: 800,
+                aperture: 8.0,
+                shutter_seconds: 1.0 / 40.0,
+            },
         };
         save_to_path(&path, &updated).expect("remplacement");
         let loaded = load_from_path(&path).expect("relecture");
@@ -232,6 +356,8 @@ mod tests {
         let config =
             parse_config(r#"{"version": 1, "demo_mode": false}"#).expect("config minimale");
         assert_eq!(config.fusion, FusionOptions::default());
+        assert_eq!(config.capture, CaptureDefaults::default());
+        assert_eq!(config.camera, CameraDefaults::default());
     }
 
     #[test]
@@ -249,9 +375,35 @@ mod tests {
             version: CONFIG_VERSION,
             demo_mode: true,
             log_level: LogLevel::Info,
+            locale: LocalePreference::System,
+            theme: ThemePreference::System,
+            sessions_dir: None,
             fusion: FusionOptions::default(),
+            capture: CaptureDefaults::default(),
+            camera: CameraDefaults::default(),
         };
         assert!(resolve_demo_mode(&config, Some("0")));
         assert!(resolve_demo_mode(&config, None));
+    }
+
+    #[test]
+    fn missing_sessions_dir_is_none() {
+        let config =
+            parse_config(r#"{"version": 1, "demo_mode": false}"#).expect("config minimale");
+        assert_eq!(config.sessions_dir, None);
+    }
+
+    #[test]
+    fn missing_locale_defaults_to_system() {
+        let config =
+            parse_config(r#"{"version": 1, "demo_mode": false}"#).expect("config minimale");
+        assert_eq!(config.locale, LocalePreference::System);
+    }
+
+    #[test]
+    fn missing_theme_defaults_to_system() {
+        let config =
+            parse_config(r#"{"version": 1, "demo_mode": false}"#).expect("config minimale");
+        assert_eq!(config.theme, ThemePreference::System);
     }
 }

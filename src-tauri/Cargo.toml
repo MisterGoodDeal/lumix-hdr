@@ -14,9 +14,9 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
+base64 = "0.22.1"
 capture = { path = "../crates/capture" }
 hdr-core = { path = "../crates/hdr-core" }
-lumix = { path = "../crates/lumix" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 tauri = { version = "2.12.5", features = ["protocol-asset"] }
@@ -25,3 +25,10 @@ thiserror = "2.0.17"
 tracing = "0.1.41"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
+
+[target.'cfg(not(windows))'.dependencies]
+lumix = { path = "../crates/lumix" }
+
+[target.'cfg(windows)'.dependencies]
+lumix = { path = "../crates/lumix", features = ["sdk"] }
+lumix-sys = { path = "../crates/lumix-sys" }
