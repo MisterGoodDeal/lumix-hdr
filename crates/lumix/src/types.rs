@@ -37,6 +37,16 @@ pub struct ShutterLimits {
     pub max_seconds: f64,
 }
 
+/// Valeurs supportées pour les steppers +/- (ISO / ouverture / SS).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ExposureCapabilities {
+    pub settings: CameraSettings,
+    pub iso_values: Vec<u32>,
+    pub aperture_values: Vec<f32>,
+    pub shutter_seconds: Vec<f64>,
+    pub shutter_labels: Vec<String>,
+}
+
 impl Default for ShutterLimits {
     fn default() -> Self {
         Self {

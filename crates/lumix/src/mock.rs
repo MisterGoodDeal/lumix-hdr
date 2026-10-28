@@ -5,7 +5,24 @@ use tracing::{debug, info};
 
 use crate::camera::Camera;
 use crate::error::CameraError;
-use crate::types::{format_shutter, nearest_shutter, CameraSettings, ExposureMode, ShutterLimits};
+use crate::types::{
+    format_shutter, nearest_shutter, standard_shutter_table, CameraSettings, ExposureCapabilities,
+    ExposureMode, ShutterLimits,
+};
+
+fn standard_iso_table() -> &'static [u32] {
+    &[
+        100, 125, 160, 200, 250, 320, 400, 500, 640, 800, 1000, 1250, 1600, 2000, 2500, 3200, 4000,
+        5000, 6400,
+    ]
+}
+
+fn standard_aperture_table() -> &'static [f32] {
+    &[
+        1.4, 1.6, 1.8, 2.0, 2.2, 2.5, 2.8, 3.2, 3.5, 4.0, 4.5, 5.0, 5.6, 6.3, 7.1, 8.0, 9.0, 10.0,
+        11.0, 13.0, 14.0, 16.0, 18.0, 20.0, 22.0,
+    ]
+}
 
 /// Point d'injection d'erreur pour les tests / démo.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -33,6 +50,7 @@ pub struct MockCamera {
     triggers_done: u32,
     pending_download: Option<Vec<u8>>,
     busy: bool,
+    live_view: bool,
 }
 
 impl Default for MockCamera {
@@ -54,6 +72,7 @@ impl MockCamera {
             triggers_done: 0,
             pending_download: None,
             busy: false,
+            live_view: false,
         }
     }
 
@@ -147,6 +166,7 @@ impl Camera for MockCamera {
         self.triggers_done = 0;
         self.pending_download = None;
         self.busy = false;
+        self.live_view = false;
         self.base_shutter = self.settings.shutter_seconds;
         self.current_ev = 0.0;
         info!("MockCamera connectée");
@@ -157,6 +177,7 @@ impl Camera for MockCamera {
         self.connected = false;
         self.pending_download = None;
         self.busy = false;
+        self.live_view = false;
         info!("MockCamera déconnectée");
         Ok(())
     }
@@ -197,6 +218,23 @@ impl Camera for MockCamera {
         self.current_ev = (seconds / self.base_shutter).log2();
         debug!(shutter = %self.settings.shutter_label, ev = self.current_ev, "réglages appliqués");
         Ok(())
+    }
+
+    fn exposure_capabilities(&mut self) -> Result<ExposureCapabilities, CameraError> {
+        self.ensure_connected()?;
+        let settings = self.read_settings()?;
+        let shutter_seconds: Vec<f64> = standard_shutter_table().iter().map(|(s, _)| *s).collect();
+        let shutter_labels: Vec<String> = standard_shutter_table()
+            .iter()
+            .map(|(_, label)| (*label).to_string())
+            .collect();
+        Ok(ExposureCapabilities {
+            settings,
+            iso_values: standard_iso_table().to_vec(),
+            aperture_values: standard_aperture_table().to_vec(),
+            shutter_seconds,
+            shutter_labels,
+        })
     }
 
     fn set_shutter(&mut self, shutter_seconds: f64) -> Result<(), CameraError> {
@@ -256,6 +294,29 @@ impl Camera for MockCamera {
         self.pending_download
             .take()
             .ok_or_else(|| CameraError::Message("aucun fichier à télécharger".to_string()))
+    }
+
+    fn start_live_view(&mut self) -> Result<(), CameraError> {
+        self.ensure_connected()?;
+        self.live_view = true;
+        Ok(())
+    }
+
+    fn stop_live_view(&mut self) -> Result<(), CameraError> {
+        self.live_view = false;
+        Ok(())
+    }
+
+    fn poll_live_view_jpeg(&mut self) -> Result<Option<Vec<u8>>, CameraError> {
+        self.ensure_connected()?;
+        if !self.live_view {
+            return Ok(None);
+        }
+        Ok(Some(self.synthesize_jpeg()?))
+    }
+
+    fn is_live_view_running(&self) -> bool {
+        self.live_view
     }
 }
 
