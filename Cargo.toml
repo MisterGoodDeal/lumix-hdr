@@ -1,5 +1,12 @@
 [workspace]
-members = ["src-tauri", "crates/hdr-core", "crates/lumix", "crates/capture"]
+members = [
+    "src-tauri",
+    "crates/hdr-core",
+    "crates/lumix",
+    "crates/capture",
+    "crates/lumix-sys",
+    "crates/lumix-probe",
+]
 resolver = "2"
 
 [workspace.package]
