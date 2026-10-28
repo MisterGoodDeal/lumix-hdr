@@ -42,3 +42,18 @@ commands.allow = ["cancel_fusion"]
 identifier = "allow-open-path"
 description = "Autorise l'ouverture d'un dossier ou fichier dans l'explorateur"
 commands.allow = ["open_path"]
+
+[[permission]]
+identifier = "allow-preview-bracket-plan"
+description = "Autorise le calcul d'un plan de bracketing"
+commands.allow = ["preview_bracket_plan"]
+
+[[permission]]
+identifier = "allow-start-capture"
+description = "Autorise le démarrage d'une séance de bracketing"
+commands.allow = ["start_capture"]
+
+[[permission]]
+identifier = "allow-cancel-capture"
+description = "Autorise l'annulation d'une prise de vue en cours"
+commands.allow = ["cancel_capture"]

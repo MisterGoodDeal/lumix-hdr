@@ -14,7 +14,9 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
+capture = { path = "../crates/capture" }
 hdr-core = { path = "../crates/hdr-core" }
+lumix = { path = "../crates/lumix" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 tauri = { version = "2.12.5", features = ["protocol-asset"] }

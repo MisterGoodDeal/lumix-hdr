@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+use capture::CaptureError;
 use hdr_core::HdrError;
 
 use crate::config::ConfigError;
@@ -13,6 +14,8 @@ pub enum AppError {
     Logging(#[from] LoggingError),
     #[error("{0}")]
     Hdr(#[from] HdrError),
+    #[error("{0}")]
+    Capture(#[from] CaptureError),
     #[error("verrou de configuration saturé")]
     LockPoisoned,
     #[error("{0}")]
@@ -38,6 +41,10 @@ impl From<AppError> for ErrorPayload {
             },
             AppError::Hdr(inner) => ErrorPayload {
                 message: hdr_message(inner),
+                detail: inner.to_string(),
+            },
+            AppError::Capture(inner) => ErrorPayload {
+                message: capture_message(inner),
                 detail: inner.to_string(),
             },
             AppError::LockPoisoned => ErrorPayload {
@@ -67,6 +74,20 @@ fn hdr_message(error: &HdrError) -> String {
     }
 }
 
+fn capture_message(error: &CaptureError) -> String {
+    match error {
+        CaptureError::InvalidPlan(detail) => format!("Plan de bracketing invalide : {detail}"),
+        CaptureError::Cancelled => "La prise de vue a été annulée.".to_string(),
+        CaptureError::Failed { step, source } => {
+            format!("Échec pendant {step:?} : {source}")
+        }
+        CaptureError::Camera(inner) => format!("Erreur appareil : {inner}"),
+        CaptureError::Hdr(inner) => hdr_message(inner),
+        CaptureError::Io(_) => "Un fichier de session n'a pas pu être écrit.".to_string(),
+        CaptureError::Message(message) => message.clone(),
+    }
+}
+
 impl From<ConfigError> for ErrorPayload {
     fn from(error: ConfigError) -> Self {
         AppError::from(error).into()
@@ -81,6 +102,12 @@ impl From<LoggingError> for ErrorPayload {
 
 impl From<HdrError> for ErrorPayload {
     fn from(error: HdrError) -> Self {
+        AppError::from(error).into()
+    }
+}
+
+impl From<CaptureError> for ErrorPayload {
+    fn from(error: CaptureError) -> Self {
         AppError::from(error).into()
     }
 }

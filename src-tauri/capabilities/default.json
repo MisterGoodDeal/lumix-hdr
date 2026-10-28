@@ -13,6 +13,9 @@
     "allow-list-jpeg-folder",
     "allow-merge-image-folder",
     "allow-cancel-fusion",
-    "allow-open-path"
+    "allow-open-path",
+    "allow-preview-bracket-plan",
+    "allow-start-capture",
+    "allow-cancel-capture"
   ]
 }

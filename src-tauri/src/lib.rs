@@ -44,7 +44,10 @@ pub fn run() {
             commands::list_jpeg_folder,
             commands::merge_image_folder,
             commands::cancel_fusion,
-            commands::open_path
+            commands::open_path,
+            commands::preview_bracket_plan,
+            commands::start_capture,
+            commands::cancel_capture
         ]);
 
     if let Err(error) = builder.run(tauri::generate_context!()) {
@@ -54,18 +57,20 @@ pub fn run() {
 }
 
 fn setup_app(app: &tauri::AppHandle) -> Result<AppState, AppError> {
-    let (config_path, log_dir) = commands::resolve_paths(app)?;
+    let (config_path, log_dir, sessions_dir) = commands::resolve_paths(app)?;
     let config = load_from_path(&config_path)?;
     let logging = logging::init(&log_dir, config.log_level)?;
     tracing::info!(
         version = env!("CARGO_PKG_VERSION"),
         os = std::env::consts::OS,
         demo_mode = config.demo_mode,
+        sessions = %sessions_dir.display(),
         "LumixHDR démarré"
     );
     Ok(AppState::new(
         config_path,
         log_dir,
+        sessions_dir,
         config,
         logging.filter,
         logging.guard,
