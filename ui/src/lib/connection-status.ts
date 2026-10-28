@@ -1,26 +1,48 @@
+import { t } from "../i18n";
 import type { AppStatus } from "../types";
+
+export type ConnectionChipColor =
+  | "default"
+  | "accent"
+  | "success"
+  | "warning"
+  | "danger";
 
 export function connectionStatusLabel(
   status: AppStatus,
-  demoConnected: boolean,
+  cameraConnected: boolean,
 ): string {
   if (status.demo_mode) {
-    return demoConnected ? "Mode démo — connecté" : "Mode démo";
+    return cameraConnected ? t("conn.demoReady") : t("conn.demo");
   }
   if (!status.camera_available) {
-    return "Pilotage caméra indisponible";
+    return t("conn.cameraOffWindows");
   }
-  return "Aucun appareil";
+  return cameraConnected ? t("conn.connected") : t("conn.noDevice");
+}
+
+/** Couleur Chip « Statuses » HeroUI pour l’état de connexion. */
+export function connectionStatusColor(
+  status: AppStatus,
+  cameraConnected: boolean,
+): ConnectionChipColor {
+  if (status.demo_mode) {
+    return cameraConnected ? "accent" : "warning";
+  }
+  if (!status.camera_available) {
+    return "danger";
+  }
+  return cameraConnected ? "success" : "warning";
 }
 
 export function connectionHelpText(status: AppStatus): string {
   if (status.demo_mode) {
-    return "Le mode démo permet de parcourir l'interface sans appareil. Aucune communication avec un GH6 n'est établie.";
+    return t("conn.helpDemo");
   }
   if (!status.camera_available) {
-    return "Le pilotage du Panasonic LUMIX DC-GH6 est réservé à Windows 10/11 64 bits. Branchez l'appareil avec un câble USB-C direct, sans hub ni rallonge, firmware à jour, mode USB « PC (Tether) ».";
+    return t("conn.helpNonWindows");
   }
-  return "Branchez le GH6 en USB-C direct (sans hub ni rallonge), firmware à jour, mode USB « PC (Tether) ».";
+  return t("conn.helpWindows");
 }
 
 export function osLabel(os: string): string {
