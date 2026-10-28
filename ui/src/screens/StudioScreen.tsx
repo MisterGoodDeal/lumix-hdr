@@ -7,18 +7,17 @@ import {
   Description,
   Input,
   Label,
-  ProgressBar,
   Tabs,
   TextField,
   toast,
 } from "@heroui/react";
 
+import { BracketStepper } from "../components/BracketStepper";
 import { ErrorDetails } from "../components/ErrorDetails";
 import { ExposureToolbar } from "../components/ExposureToolbar";
 import { useT } from "../i18n/react";
 import {
   cancelCapture,
-  captureStateLabel,
   onCaptureProgress,
   previewBracketPlan,
   startCapture,
@@ -597,9 +596,28 @@ export function StudioScreen() {
     return <p className="text-muted">{t("common.loading")}</p>;
   }
 
+  const stepperProgress: CaptureProgress | null =
+    running
+      ? progress
+      : result?.state.kind === "done" &&
+          activePlan !== null &&
+          result.originals.length === activePlan.slots.length
+        ? { state: { kind: "done" }, progress: 1, message: "" }
+        : null;
+
   return (
-    <div className="flex flex-col gap-4 xl:flex-row">
-      <section className="flex min-w-0 flex-1 flex-col gap-4">
+    <div className="flex flex-col gap-4">
+      {activePlan ? (
+        <BracketStepper
+          slots={activePlan.slots}
+          progress={stepperProgress}
+          iso={activePlan.base.iso}
+          apertureLabel={formatAperture(activePlan.base.aperture)}
+        />
+      ) : null}
+
+      <div className="flex flex-col gap-4 xl:flex-row">
+        <section className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="relative min-h-[420px] overflow-hidden rounded-xl bg-black/50">
           {displayUrl ? (
             <img
@@ -834,25 +852,6 @@ export function StudioScreen() {
           </Tabs>
         </div>
 
-        {activePlan ? (
-          <div className="rounded-lg border border-foreground/10 p-3 text-sm">
-            <p className="mb-2 font-medium">
-              {t("studio.plan", {
-                iso: activePlan.base.iso,
-                aperture: formatAperture(activePlan.base.aperture),
-              })}
-            </p>
-            <ul className="flex max-h-40 flex-col gap-1 overflow-auto text-muted">
-              {activePlan.slots.map((slot) => (
-                <li key={slot.index}>
-                  #{slot.index + 1} · {formatCenterEv(slot.relative_ev)} ·{" "}
-                  {slot.shutter_label}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
         <div className="flex gap-2">
           <Button
             variant="primary"
@@ -872,20 +871,6 @@ export function StudioScreen() {
           </Button>
         </div>
 
-        {running || (progress && progress.progress > 0) ? (
-          <ProgressBar
-            value={Math.round((progress?.progress ?? 0) * 100)}
-            minValue={0}
-            maxValue={100}
-          >
-            <Label>{captureStateLabel(progress)}</Label>
-            <ProgressBar.Track>
-              <ProgressBar.Fill />
-            </ProgressBar.Track>
-            <ProgressBar.Output />
-          </ProgressBar>
-        ) : null}
-
         {result?.session_dir ? (
           <Button
             variant="secondary"
@@ -903,6 +888,7 @@ export function StudioScreen() {
 
         <ErrorDetails error={runError ?? planError ?? error} />
       </aside>
+      </div>
     </div>
   );
 }
