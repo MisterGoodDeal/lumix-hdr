@@ -1,39 +1,44 @@
 # LumixHDR
 
-Application de bureau pour le bracketing d’exposition d’un Panasonic LUMIX DC-GH6 et la fusion HDR locale. Cette version (0.1.0) pose le squelette et la fusion OpenCV : interface sombre, journaux, mode démo, fusion d’un dossier de JPEG sans appareil. Le pilotage de l’appareil arrivera dans les phases suivantes.
+[![CI](https://github.com/MisterGoodDeal/lumix-hdr/actions/workflows/ci.yml/badge.svg)](https://github.com/MisterGoodDeal/lumix-hdr/actions/workflows/ci.yml)
 
-## Prérequis
+App de bureau pour bracketter un **Panasonic LUMIX GH6** en USB, fusionner les expo en HDR localement, et garder un historique des séances.
 
-- **Windows 10/11 64 bits** pour le contrôle de l’appareil (SDK LUMIX USB). Le module de fusion sera testé sur toutes les plateformes ; le pilotage caméra refuse de démarrer ailleurs, avec un message clair.
-- Appareil **LUMIX DC-GH6**, firmware à jour.
-- Câble **USB-C direct** : pas de hub USB ni de rallonge (non supportés par Panasonic).
-- Pour le développement : Rust 1.99.1 (via `rust-toolchain.toml`), Node 22, Yarn 1, OpenCV 4 + LLVM/libclang (voir [`docs/architecture.md`](docs/architecture.md)).
+Pilotage caméra = **Windows** + SDK LUMIX. La fusion JPEG marche partout (et en mode démo sans boîtier).
 
-## Installation (développement)
+## Ce que ça fait
+
+- **Studio** — connexion PnP, Live View, réglages ISO / f / vitesse, bracketing ±EV puis fusion
+- **Résultat** — fusion d’un dossier de JPEG déjà pris (AlignMTB, Mertens ou Debevec)
+- **Historique** — cartes de séances, comparaison avant/après, suppression
+- **Réglages** — démo, thème, langue FR/EN, dossiers, mises à jour depuis GitHub Releases
+
+## Prérequis (caméra)
+
+- Windows 10/11 64 bits
+- GH6 à jour, USB-C **direct** (pas de hub / rallonge — Panasonic ne les gère pas)
+- Mode USB du boîtier : **PC (Tether)** + drivers OK  
+  Tant que ce n’est pas le cas, l’app ne voit rien : ce n’est pas un bug d’interface.
+
+Sans boîtier : active le **mode démo** dans Réglages (ou `LUMIX_HDR_DEMO=1`).
+
+## Installer
+
+Les builds Windows (installeur NSIS) sortent sur les [Releases](https://github.com/MisterGoodDeal/lumix-hdr/releases) à chaque tag `vX.Y.Z`. Une fois installé, Réglages → *Vérifier les mises à jour* pour passer à la suivante.
+
+## Développement
+
+Rust 1.99.1, Node 22, Yarn 1, OpenCV 4 + LLVM. Sur Windows : vcpkg OpenCV + SDK LUMIX dans `vendor/lumix-sdk/` (gitignoré). Détail dans [`AGENTS.md`](AGENTS.md) et [`docs/architecture.md`](docs/architecture.md).
 
 ```bash
 yarn install
 yarn tauri dev
 ```
 
-## Utilisation rapide
+Gates locaux : `cargo fmt` / `clippy -D warnings` / `cargo test --all`, puis `yarn lint` / `typecheck` / `test`.
 
-1. Lancer l’application.
-2. L’écran **Connexion** indique si le pilotage caméra est disponible (Windows uniquement).
-3. Activer le **mode démo** dans Réglages pour parcourir l’interface sans appareil.
-4. L’écran **Résultat** fusionne un dossier de JPEG (AlignMTB + Mertens, Debevec en option) sans appareil.
-5. L’écran **Prise de vue** (mode démo) enchaîne un bracketing MockCamera puis la fusion.
-6. L’écran Historique arrivera à la phase 6.
+Release / secrets updater : [`docs/release.md`](docs/release.md).
 
-## Mode démo
+## Licence
 
-Le mode démo s’active :
-
-- dans **Réglages** (interrupteur persisté) ;
-- ou avec la variable d’environnement `LUMIX_HDR_DEMO=1` (prioritaire sur le fichier de configuration).
-
-En mode démo, le bouton **Connecter** confirme par un toast qu’aucune connexion à un appareil réel n’est tentée.
-
-## Journaux
-
-Les journaux roulants sont écrits dans le dossier de logs de l’application. Le chemin est affiché dans Réglages.
+MIT OR Apache-2.0 — sauf le SDK Panasonic (`vendor/`), qui reste sous sa propre licence et n’est jamais versionné ici.

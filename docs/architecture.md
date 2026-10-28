@@ -103,3 +103,10 @@ App / lumix-probe
 - Live View : `Ctrl_LiveView_Start/Stop` + `Get_LiveView_data` (helper shim JPEG) ; pause pendant le bracket.
 - Smoke test : `cargo run -p lumix-probe` avec `Lmxptpif.dll` dans le `PATH` ou à côté du binaire. Le `build.rs` Tauri copie la DLL vers `target/<profile>/` si le SDK est trouvé.
 - Variable optionnelle : `LUMIX_SDK_DIR` (racine du SDK). **Ne jamais committer** `vendor/` ni la DLL.
+
+## Release / updater (phase 7)
+
+- Bundle Windows : NSIS (`bundle.targets: ["nsis"]`).
+- Overlay `tauri.release.conf.json` : `createUpdaterArtifacts` + copie `Lmxptpif.dll` à côté de l’exe.
+- Plugins `tauri-plugin-updater` + `tauri-plugin-process` ; endpoint GitHub `latest.json`.
+- Voir [`docs/release.md`](release.md).

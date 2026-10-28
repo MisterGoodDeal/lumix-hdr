@@ -14,7 +14,7 @@ Branche : `main`. Version `0.1.0`.
 | 4 — SDK LUMIX (`lumix-sys` / `LumixCamera` / `lumix-probe`) | **faite** (Windows + `vendor/lumix-sdk`) |
 | 5 — Live view UI + page Studio | **faite** |
 | 6 — Historique (cartes + détail avant/après) | **faite** |
-| 7 — Release / packaging | plus tard |
+| 7 — Release / packaging (NSIS + updater GitHub) | **en cours** |
 
 **Le GH6 branché en USB n’est pas vu tant qu’il n’est pas en mode PC (Tether) / drivers OK : ce n’est pas un bug UI.** `camera_available` vaut `cfg!(windows)`. Hors démo, Studio appelle le SDK ; sans appareil PnP la commande échoue clairement. Débranchement → event `camera-disconnected`.
 
@@ -82,6 +82,15 @@ cargo run -p lumix-probe
 - UI : grille de [Cards HeroUI](https://heroui.com/en/docs/react/components/card) + détail avec slider avant/après (expo centrale vs HDR).
 
 Mode démo : réglage persisté **ou** `LUMIX_HDR_DEMO=1` → `MockCamera`. Hors démo (Windows) → `LumixCamera`.
+
+## Phase 7 (release)
+
+- Tag `vX.Y.Z` → workflow `Release` (Windows NSIS + `latest.json` updater).
+- Détails secrets / signing / SDK chiffré : [`docs/release.md`](docs/release.md).
+- SDK CI : `ci/lumix-sdk-library.zip.enc` + secret `LUMIX_SDK_PASSPHRASE` (pas de zip en secret : limite 64 Ko).
+- UI : Réglages → vérifier / installer (plugins `updater` + `process`).
+- Overlay packaging : `src-tauri/tauri.release.conf.json` (DLL + artifacts updater).
+- Sync versions : `yarn sync-version 0.2.0` (`scripts/sync-version.mjs`).
 
 ## Git
 
