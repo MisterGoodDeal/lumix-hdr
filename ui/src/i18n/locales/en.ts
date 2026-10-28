@@ -82,6 +82,11 @@ export const en = {
   "studio.stepEv": "Gap between shots",
   "studio.centerEv": "Exposure center",
   "studio.plan": "Plan (ISO {{iso}}, {{aperture}})",
+  "studio.stepN": "Step {{n}}",
+  "studio.stepCompleted": "Completed",
+  "studio.stepInProgress": "In progress",
+  "studio.stepPending": "Pending",
+  "studio.stepFailed": "Failed",
   "studio.trigger": "Shoot",
   "studio.openSession": "Open session",
   "studio.browserPreview":

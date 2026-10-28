@@ -84,6 +84,11 @@ export const fr: { [K in keyof typeof en]: string } = {
   "studio.stepEv": "Écart entre vues",
   "studio.centerEv": "Centre d’exposition",
   "studio.plan": "Plan (ISO {{iso}}, {{aperture}})",
+  "studio.stepN": "Étape {{n}}",
+  "studio.stepCompleted": "Terminé",
+  "studio.stepInProgress": "En cours",
+  "studio.stepPending": "En attente",
+  "studio.stepFailed": "Échec",
   "studio.trigger": "Déclencher",
   "studio.openSession": "Ouvrir la séance",
   "studio.browserPreview":
