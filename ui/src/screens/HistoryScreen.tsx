@@ -113,15 +113,17 @@ export function HistoryScreen() {
     if (!ok) {
       return;
     }
+    // En détail, préférer le chemin d’ouverture (liste) : le détail peut
+    // renvoyer un chemin canonisé Windows (\\?\…) différent de selectedDir.
+    const pathToDelete = selectedDir ?? sessionDir;
+    const wasViewingDetail = selectedDir !== null;
     try {
-      await deleteSession(sessionDir);
-      setSummaries((prev) =>
-        prev.filter((item) => item.session_dir !== sessionDir),
-      );
-      if (selectedDir === sessionDir) {
+      await deleteSession(pathToDelete);
+      if (wasViewingDetail) {
         closeDetail();
       }
       toast.success(t("history.deleted"));
+      await refresh();
     } catch (cause) {
       const parsed = parseAppError(cause);
       toast.danger(t("history.deleteFail"), { description: parsed.message });
