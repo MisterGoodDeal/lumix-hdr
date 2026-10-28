@@ -12,5 +12,5 @@ pub use plan::{
     MAX_STEP_EV, MIN_CENTER_EV, MIN_STEP_EV,
 };
 pub use runner::{preview_plan, run_capture, CaptureProgress};
-pub use session::{CaptureSessionResult, FileEntry, SessionManifest};
+pub use session::{relocate_session, CaptureSessionResult, FileEntry, SessionManifest};
 pub use state::{CaptureState, CaptureStep};
