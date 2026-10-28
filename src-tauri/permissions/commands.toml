@@ -39,6 +39,21 @@ description = "Autorise le changement du dossier des séances HDR"
 commands.allow = ["set_sessions_dir"]
 
 [[permission]]
+identifier = "allow-list-sessions"
+description = "Autorise la liste des séances HDR enregistrées"
+commands.allow = ["list_sessions"]
+
+[[permission]]
+identifier = "allow-get-session"
+description = "Autorise la lecture du détail d'une séance HDR"
+commands.allow = ["get_session"]
+
+[[permission]]
+identifier = "allow-delete-session"
+description = "Autorise la suppression d'une séance HDR"
+commands.allow = ["delete_session"]
+
+[[permission]]
 identifier = "allow-list-jpeg-folder"
 description = "Autorise la liste des JPEG d'un dossier"
 commands.allow = ["list_jpeg_folder"]

@@ -7,8 +7,9 @@ use std::time::Duration;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine;
 use capture::{
+    delete_session as remove_session_dir, list_session_summaries, load_session_detail,
     preview_plan, relocate_session, run_capture, BracketPlan, BracketRequest, CaptureProgress,
-    CaptureSessionResult,
+    CaptureSessionResult, SessionDetail, SessionSummary,
 };
 use hdr_core::{fuse_folder, jpeg_files_in_dir, FusionOptions, FusionOutputs};
 use lumix::{
@@ -326,6 +327,30 @@ pub fn set_sessions_dir(
     }
     info!(sessions = %resolved.display(), "dossier des séances mis à jour");
     Ok(build_status(&config, &state.log_dir, &resolved))
+}
+
+#[tauri::command]
+pub fn list_sessions(state: State<'_, AppState>) -> Result<Vec<SessionSummary>, ErrorPayload> {
+    let parent = sessions_path(&state)?;
+    Ok(list_session_summaries(&parent)?)
+}
+
+#[tauri::command]
+pub fn get_session(
+    session_dir: String,
+    state: State<'_, AppState>,
+) -> Result<SessionDetail, ErrorPayload> {
+    let parent = sessions_path(&state)?;
+    Ok(load_session_detail(&parent, Path::new(session_dir.trim()))?)
+}
+
+#[tauri::command]
+pub fn delete_session(session_dir: String, state: State<'_, AppState>) -> Result<(), ErrorPayload> {
+    let parent = sessions_path(&state)?;
+    let trimmed = session_dir.trim();
+    remove_session_dir(&parent, Path::new(trimmed))?;
+    info!(session = %trimmed, "séance supprimée");
+    Ok(())
 }
 
 #[tauri::command]
@@ -665,9 +690,11 @@ pub async fn start_capture(
         let app_version = env!("CARGO_PKG_VERSION").to_string();
         let app_for_progress = app.clone();
 
-        // Pause Live View + watch réglages pendant le bracket (mutex SDK).
+        // Pause LV / watches pendant le bracket (évite heartbeat + DATA_RCV pendant PTP).
         let _ = stop_live_view_internal(&state);
         stop_settings_watch(&state);
+        stop_unplug_watch(&state);
+        lumix::begin_capture_wait();
 
         // Emprunte la session ouverte (pas de nouveau Select_PnPDevice).
         let mut camera = take_camera(&state)?;
@@ -693,16 +720,25 @@ pub async fn start_capture(
         .map_err(|_| AppError::Message("Prise de vue interrompue".to_string()))?;
 
         let (capture_result, camera) = blocked;
+        let demo = is_demo(&state).unwrap_or(false);
         if let Err(error) = store_camera(&state, camera) {
             tracing::warn!(
                 message = %error.message,
                 "impossible de remettre la caméra en session"
             );
-        } else if let Err(error) = start_settings_watch(&app, &state) {
-            tracing::warn!(
-                message = %error.message,
-                "impossible de relancer la surveillance des réglages"
-            );
+        } else {
+            if let Err(error) = start_settings_watch(&app, &state) {
+                tracing::warn!(
+                    message = %error.message,
+                    "impossible de relancer la surveillance des réglages"
+                );
+            }
+            if let Err(error) = start_unplug_watch(&app, &state, demo) {
+                tracing::warn!(
+                    message = %error.message,
+                    "impossible de relancer la surveillance PnP"
+                );
+            }
         }
 
         match capture_result {
@@ -750,6 +786,7 @@ pub fn cancel_capture(state: State<'_, AppState>) -> Result<(), ErrorPayload> {
         .lock()
         .map_err(|_| AppError::LockPoisoned)?;
     cancel.store(true, Ordering::SeqCst);
+    lumix::request_capture_cancel();
     info!("annulation de prise de vue demandée");
     Ok(())
 }
