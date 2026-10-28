@@ -1,0 +1,15 @@
+[package]
+name = "lumix-probe"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Smoke test SDK LUMIX : PnP + lecture réglages"
+publish = false
+
+[[bin]]
+name = "lumix-probe"
+path = "src/main.rs"
+
+[target.'cfg(windows)'.dependencies]
+lumix-sys = { path = "../lumix-sys" }
