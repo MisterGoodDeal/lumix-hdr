@@ -1,0 +1,13 @@
+[package]
+name = "lumix"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Abstraction appareil photo (MockCamera en phase 3)"
+
+[dependencies]
+image = { version = "0.25.9", default-features = false, features = ["jpeg"] }
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.17"
+tracing = "0.1.41"
