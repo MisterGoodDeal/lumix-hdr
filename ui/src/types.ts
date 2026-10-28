@@ -153,6 +153,47 @@ export type CaptureSessionResult = {
   originals: string[];
 };
 
+export type SessionFileEntry = {
+  name: string;
+  sha256: string;
+  relative_ev: number;
+  shutter_label: string;
+};
+
+export type SessionSummary = {
+  session_dir: string;
+  created_at: string;
+  session_name: string;
+  frame_count: number;
+  step_ev: number;
+  center_ev: number;
+  state_kind: string;
+  thumb_jpeg: string | null;
+  has_fused: boolean;
+  original_count: number;
+  error_count: number;
+};
+
+export type SessionDetail = {
+  session_dir: string;
+  created_at: string;
+  session_name: string;
+  app_version: string;
+  state: CaptureState;
+  errors: string[];
+  frame_count: number;
+  step_ev: number;
+  center_ev: number;
+  base_iso: number;
+  base_aperture: number;
+  base_shutter_label: string;
+  originals: SessionFileEntry[];
+  original_paths: string[];
+  fused_jpeg: string | null;
+  before_jpeg: string | null;
+  slots: ExposureSlot[];
+};
+
 export const DEFAULT_CAPTURE_DEFAULTS: CaptureDefaults = {
   session_name: "hdr",
   frame_count: 5,
