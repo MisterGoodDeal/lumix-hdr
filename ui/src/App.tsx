@@ -1,90 +1,99 @@
+import type { Icon } from "@phosphor-icons/react";
+import {
+  Camera,
+  ClockCounterClockwise,
+  Image,
+  Sliders,
+} from "@phosphor-icons/react";
 import { useEffect } from "react";
-import { Spinner, Tabs, Toast } from "@heroui/react";
+import { Button, Spinner, Toast } from "@heroui/react";
 
-import { CaptureScreen } from "./screens/CaptureScreen";
-import { ConnectionScreen } from "./screens/ConnectionScreen";
+import type { TranslationKey } from "./i18n";
+import { useT } from "./i18n/react";
 import { PlaceholderScreen } from "./screens/PlaceholderScreen";
 import { ResultScreen } from "./screens/ResultScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
+import { StudioScreen } from "./screens/StudioScreen";
 import { useAppStore } from "./store/app-store";
 import type { Screen } from "./types";
 
-const SCREENS: { id: Screen; label: string }[] = [
-  { id: "connexion", label: "Connexion" },
-  { id: "prise-de-vue", label: "Prise de vue" },
-  { id: "resultat", label: "Résultat" },
-  { id: "historique", label: "Historique" },
-  { id: "reglages", label: "Réglages" },
+const SCREENS: {
+  id: Screen;
+  labelKey: TranslationKey;
+  Icon: Icon;
+}[] = [
+  { id: "studio", labelKey: "nav.studio", Icon: Camera },
+  { id: "resultat", labelKey: "nav.result", Icon: Image },
+  { id: "historique", labelKey: "nav.history", Icon: ClockCounterClockwise },
+  { id: "reglages", labelKey: "nav.settings", Icon: Sliders },
 ];
 
 export default function App() {
+  const t = useT();
   const loading = useAppStore((state) => state.loading);
   const screen = useAppStore((state) => state.screen);
   const setScreen = useAppStore((state) => state.setScreen);
   const loadStatus = useAppStore((state) => state.loadStatus);
 
   useEffect(() => {
-    document.documentElement.classList.add("dark");
-    document.documentElement.setAttribute("data-theme", "dark");
     void loadStatus();
   }, [loadStatus]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <Toast.Provider placement="top end" />
-      <header className="border-b border-foreground/10 px-6 py-4">
-        <h1 className="text-xl font-semibold">LumixHDR</h1>
-        <p className="text-sm text-muted">
-          Bracketing d'exposition et fusion HDR pour Panasonic GH6
-        </p>
-      </header>
-      <main className="flex flex-1 flex-col gap-6 px-6 py-6">
+      <Toast.Provider placement="top start" />
+      <main className="flex flex-1 flex-col overflow-auto px-4 pb-24 pt-4">
         {loading ? (
           <div className="flex items-center gap-3">
             <Spinner />
-            <span>Chargement…</span>
+            <span>{t("common.loading")}</span>
           </div>
         ) : (
-          <Tabs
-            selectedKey={screen}
-            onSelectionChange={(key) => {
-              if (typeof key === "string") {
-                setScreen(key as Screen);
-              }
-            }}
-            className="w-full"
-          >
-            <Tabs.ListContainer>
-              <Tabs.List aria-label="Navigation principale">
-                {SCREENS.map((item) => (
-                  <Tabs.Tab key={item.id} id={item.id}>
-                    {item.label}
-                    <Tabs.Indicator />
-                  </Tabs.Tab>
-                ))}
-              </Tabs.List>
-            </Tabs.ListContainer>
-            <Tabs.Panel id="connexion">
-              <ConnectionScreen />
-            </Tabs.Panel>
-            <Tabs.Panel id="prise-de-vue">
-              <CaptureScreen />
-            </Tabs.Panel>
-            <Tabs.Panel id="resultat">
-              <ResultScreen />
-            </Tabs.Panel>
-            <Tabs.Panel id="historique">
+          <>
+            {screen === "studio" ? <StudioScreen /> : null}
+            {screen === "resultat" ? <ResultScreen /> : null}
+            {screen === "historique" ? (
               <PlaceholderScreen
-                title="Historique"
-                description="Les séquences précédentes seront listées à partir des manifestes à la phase 6."
+                title={t("nav.history")}
+                description={t("app.historySoon")}
               />
-            </Tabs.Panel>
-            <Tabs.Panel id="reglages">
-              <SettingsScreen />
-            </Tabs.Panel>
-          </Tabs>
+            ) : null}
+            {screen === "reglages" ? <SettingsScreen /> : null}
+          </>
         )}
       </main>
+
+      {!loading ? (
+        <nav
+          aria-label={t("nav.aria")}
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-foreground/10 bg-background/95 backdrop-blur-md"
+        >
+          <div className="mx-auto flex max-w-3xl items-stretch justify-around gap-1 px-2 py-2">
+            {SCREENS.map(({ id, labelKey, Icon }) => {
+              const selected = screen === id;
+              return (
+                <Button
+                  key={id}
+                  variant={selected ? "primary" : "ghost"}
+                  size="sm"
+                  aria-current={selected ? "page" : undefined}
+                  className="h-auto min-w-0 flex-1 flex-col gap-1 px-2 py-2"
+                  onPress={() => setScreen(id)}
+                >
+                  <Icon
+                    size={32}
+                    weight={selected ? "fill" : "regular"}
+                    aria-hidden
+                  />
+                  <span className="text-[11px] leading-none">
+                    {t(labelKey)}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+        </nav>
+      ) : null}
     </div>
   );
 }
