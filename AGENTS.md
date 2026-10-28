@@ -13,7 +13,8 @@ Branche : `main`. Version `0.1.0`.
 | 3 — `capture` + `MockCamera` + écran Prise de vue | **faite** |
 | 4 — SDK LUMIX (`lumix-sys` / `LumixCamera` / `lumix-probe`) | **faite** (Windows + `vendor/lumix-sdk`) |
 | 5 — Live view UI + page Studio | **faite** |
-| 6 — Historique, release, comparaison avant/après | plus tard |
+| 6 — Historique (cartes + détail avant/après) | **faite** |
+| 7 — Release / packaging | plus tard |
 
 **Le GH6 branché en USB n’est pas vu tant qu’il n’est pas en mode PC (Tether) / drivers OK : ce n’est pas un bug UI.** `camera_available` vaut `cfg!(windows)`. Hors démo, Studio appelle le SDK ; sans appareil PnP la commande échoue clairement. Débranchement → event `camera-disconnected`.
 
@@ -73,7 +74,12 @@ cargo run -p lumix-probe
 
 ## Commandes Tauri
 
-`get_app_status`, `set_demo_mode`, `set_log_level`, `get_log_dir`, `set_fusion_options`, `set_locale`, `set_theme`, `set_sessions_dir`, `list_jpeg_folder`, `merge_image_folder`, `cancel_fusion`, `open_path`, `preview_bracket_plan`, `start_capture`, `cancel_capture`, `list_cameras`, `connect_camera`, `disconnect_camera`, `get_camera_settings`, `set_camera_settings`, `set_capture_defaults`, `start_live_view`, `stop_live_view`. Événements `fusion-progress` / `capture-progress` / `liveview-frame` / `camera-disconnected`.
+`get_app_status`, `set_demo_mode`, `set_log_level`, `get_log_dir`, `set_fusion_options`, `set_locale`, `set_theme`, `set_sessions_dir`, `list_sessions`, `get_session`, `delete_session`, `list_jpeg_folder`, `merge_image_folder`, `cancel_fusion`, `open_path`, `preview_bracket_plan`, `start_capture`, `cancel_capture`, `list_cameras`, `connect_camera`, `disconnect_camera`, `get_camera_settings`, `set_camera_settings`, `set_capture_defaults`, `start_live_view`, `stop_live_view`. Événements `fusion-progress` / `capture-progress` / `liveview-frame` / `camera-disconnected`.
+
+### Phase 6 (historique)
+
+- `list_sessions` / `get_session` : lit les `manifest.json` du dossier séances.
+- UI : grille de [Cards HeroUI](https://heroui.com/en/docs/react/components/card) + détail avec slider avant/après (expo centrale vs HDR).
 
 Mode démo : réglage persisté **ou** `LUMIX_HDR_DEMO=1` → `MockCamera`. Hors démo (Windows) → `LumixCamera`.
 

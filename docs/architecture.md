@@ -65,7 +65,7 @@ vcpkg install opencv4[jpeg,png,tiff]:x64-windows-static-md
 
 Renseigner `OpenCV_DIR` vers `installed/x64-windows-static-md/share/opencv4` et `LIBCLANG_PATH` vers le dossier contenant `libclang.dll`.
 
-## Commandes Tauri (phases 2–5)
+## Commandes Tauri (phases 2–6)
 
 | Commande | Rôle |
 | --- | --- |
@@ -74,6 +74,7 @@ Renseigner `OpenCV_DIR` vers `installed/x64-windows-static-md/share/opencv4` et 
 | `cancel_fusion` | Pose le drapeau d’annulation coopérative |
 | `set_fusion_options` | Enregistre alignement / méthode / formats |
 | `open_path` | Ouvre le fichier ou le dossier dans l’explorateur |
+| `list_sessions` / `get_session` / `delete_session` | Historique : manifests + suppression |
 | `preview_bracket_plan` / `start_capture` / `cancel_capture` | Bracketing (Mock ou SDK) |
 | `list_cameras` / `connect_camera` / `disconnect_camera` | Session PnP LUMIX (ou Mock en démo) |
 | `get_camera_settings` / `set_camera_settings` | ISO / f / SS + capacités pour steppers |
@@ -82,7 +83,7 @@ Renseigner `OpenCV_DIR` vers `installed/x64-windows-static-md/share/opencv4` et 
 
 L’aperçu JPEG utilise le protocole `asset:` (`convertFileSrc`). Live View : event `liveview-frame` (base64). Unplug : `camera-disconnected`.
 
-UI : onglet **Studio** (connexion + preview + overlays +/- + bracketing).
+UI : **Studio** (connexion + Live View + bracketing), **Historique** (cartes HeroUI + détail avant/après).
 
 ## SDK LUMIX (phase 4, Windows)
 

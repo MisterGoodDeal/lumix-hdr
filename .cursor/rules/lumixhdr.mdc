@@ -7,7 +7,7 @@ Lis `AGENTS.md` à la racine avant toute modification. C’est la source de repr
 
 - Réponds en français. Yarn, pas pnpm. Tauri 2.12, OpenCV 4. SDK = phase 4 (faite) via `vendor/lumix-sdk` gitignoré.
 - Aucun `unwrap`/`expect` hors tests. N’invente jamais l’API LUMIX. Ne committe pas `vendor/` ni la DLL.
-- Phases 1–5 faites (Studio + Live View). Phase 6 = historique / release. Sur Windows : fusion OpenCV + MockCamera (démo) ou LumixCamera (hors démo).
+- Phases 1–6 faites (historique cartes + avant/après). Phase 7 = release. Sur Windows : fusion OpenCV + MockCamera (démo) ou LumixCamera (hors démo).
 - UI i18n FR/EN (`ui/src/i18n`), locale `system|en|fr` (défaut système, anglais sinon).
 - Thème `system|dark|light` (`ui/src/theme`).
 - `camera_available` est `cfg!(windows)` ; absence de GH6 PnP ≠ bug UI.
