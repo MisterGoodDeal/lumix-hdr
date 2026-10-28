@@ -57,6 +57,22 @@ static SDK_INIT: Once = Once::new();
 static SETTINGS_CHANGED: AtomicBool = AtomicBool::new(false);
 /// Ignore les notifs juste après un apply UI (évite un aller-retour inutile).
 static SUPPRESS_SETTINGS_NOTIFY: AtomicBool = AtomicBool::new(false);
+/// Annulation coopérative pendant `wait_transfer_outcome`.
+static CAPTURE_CANCEL: AtomicBool = AtomicBool::new(false);
+
+/// À appeler avant un bracket pour réarmer l’attente transfert.
+pub fn begin_capture_wait() {
+    CAPTURE_CANCEL.store(false, Ordering::SeqCst);
+    if let Ok(mut guard) = PENDING.lock() {
+        guard.outcome = TransferOutcome::Idle;
+    }
+}
+
+/// Annule l’attente PTP (réveille le wait) — appelé depuis `cancel_capture`.
+pub fn request_capture_cancel() {
+    CAPTURE_CANCEL.store(true, Ordering::SeqCst);
+    PENDING_CV.notify_all();
+}
 
 fn ensure_sdk_init() {
     SDK_INIT.call_once(|| unsafe {
@@ -172,13 +188,19 @@ unsafe extern "system" fn notify_callback(event_type: u32, event_param: u32) -> 
         }
     };
 
-    if let Some(outcome) = outcome {
-        if let Ok(mut guard) = PENDING.lock() {
-            // Ne pas écraser un JPEG déjà reçu (RAW tardif d'une vue précédente).
-            if !matches!(guard.outcome, TransferOutcome::Jpeg(_)) {
-                guard.outcome = outcome;
-                PENDING_CV.notify_all();
+    match outcome {
+        Some(outcome) => {
+            if let Ok(mut guard) = PENDING.lock() {
+                // Ne pas écraser un JPEG déjà reçu (RAW tardif d'une vue précédente).
+                if !matches!(guard.outcome, TransferOutcome::Jpeg(_)) {
+                    guard.outcome = outcome;
+                    PENDING_CV.notify_all();
+                }
             }
+        }
+        None => {
+            // RAW / non-JPEG skip : réveiller le wait pour qu’il continue d’attendre le JPEG.
+            PENDING_CV.notify_all();
         }
     }
     0
@@ -379,10 +401,14 @@ impl LumixCamera {
 
     fn wait_transfer_outcome(timeout: Duration) -> Result<Vec<u8>, CameraError> {
         let deadline = Instant::now() + timeout;
+        let slice = Duration::from_millis(200);
         let mut guard = PENDING
             .lock()
             .map_err(|_| CameraError::Message("verrou callback empoisonné".to_string()))?;
         loop {
+            if CAPTURE_CANCEL.load(Ordering::SeqCst) {
+                return Err(CameraError::Message("capture annulée".to_string()));
+            }
             match std::mem::replace(&mut guard.outcome, TransferOutcome::Idle) {
                 TransferOutcome::Jpeg(bytes) => return Ok(bytes),
                 TransferOutcome::Failed(message) => {
@@ -394,20 +420,27 @@ impl LumixCamera {
             if now >= deadline {
                 return Err(CameraError::Timeout);
             }
-            let (g, result) = PENDING_CV
-                .wait_timeout(guard, deadline.saturating_duration_since(now))
+            let wait_for = deadline.saturating_duration_since(now).min(slice);
+            let (g, _timeout) = PENDING_CV
+                .wait_timeout(guard, wait_for)
                 .map_err(|_| CameraError::Message("verrou callback empoisonné".to_string()))?;
             guard = g;
-            if result.timed_out() {
-                match std::mem::replace(&mut guard.outcome, TransferOutcome::Idle) {
-                    TransferOutcome::Jpeg(bytes) => return Ok(bytes),
-                    TransferOutcome::Failed(message) => {
-                        return Err(CameraError::Message(message));
-                    }
-                    TransferOutcome::Idle => return Err(CameraError::Timeout),
-                }
-            }
         }
+    }
+
+    fn ensure_pc_transfer_target(&mut self) -> Result<(), CameraError> {
+        let mut ret_error = 0u32;
+        let target = LMX_DEF_SETUP_CFG_FILE_TARGET_CFG_ONLY_PC;
+        let ok = unsafe { lmx_sys_setup_files_config_set_target(target, &mut ret_error) };
+        if ok != LMX_BOOL_TRUE {
+            warn!(
+                ret_error,
+                "SetupFilesConfig_Set_Target(ONLY_PC) avant capture a échoué"
+            );
+        } else {
+            self.saved_target = Some(target);
+        }
+        Ok(())
     }
 }
 
@@ -763,14 +796,18 @@ impl Camera for LumixCamera {
 
     fn trigger(&mut self) -> Result<(), CameraError> {
         self.ensure_connected()?;
+        // Après Live View, réaffirmer ONLY_PC sinon le GH6 peut ne pas envoyer REQ_TRNSFER.
+        self.ensure_pc_transfer_target()?;
         Self::clear_pending();
         self.pending_jpeg = None;
         let mut ret_error = 0u32;
+        info!("déclenchement ONESHOT");
         check_bool(
             unsafe { lmx_sys_rec_ctrl_release_oneshot(&mut ret_error) },
             "Rec_Ctrl_Release(ONESHOT)",
             ret_error,
         )?;
+        debug!("ONESHOT accepté — attente REQ_TRNSFER");
         Ok(())
     }
 
@@ -779,6 +816,10 @@ impl Camera for LumixCamera {
         // Le JPEG a déjà été lu dans le callback ; on attend juste la fin.
         let jpeg = Self::wait_transfer_outcome(CAPTURE_TIMEOUT)?;
         self.pending_jpeg = Some(jpeg);
+        info!(
+            bytes = self.pending_jpeg.as_ref().map_or(0, Vec::len),
+            "JPEG reçu"
+        );
         Ok(())
     }
 
@@ -825,7 +866,8 @@ impl Camera for LumixCamera {
         if ok != LMX_BOOL_TRUE {
             warn!(ret_error, "Ctrl_LiveView_Stop a échoué");
         }
-        std::thread::sleep(Duration::from_millis(100));
+        // Laisser le boîtier sortir du mode LV avant un still (sinon ONESHOT sans REQ_TRNSFER).
+        std::thread::sleep(Duration::from_millis(400));
         info!("Live View arrêté");
         Ok(())
     }

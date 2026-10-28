@@ -17,7 +17,10 @@ pub use types::{
 };
 
 #[cfg(all(windows, feature = "sdk"))]
-pub use sdk::{suppress_settings_notify_briefly, take_settings_changed, LumixCamera};
+pub use sdk::{
+    begin_capture_wait, request_capture_cancel, suppress_settings_notify_briefly,
+    take_settings_changed, LumixCamera,
+};
 
 #[cfg(not(all(windows, feature = "sdk")))]
 pub fn take_settings_changed() -> bool {
@@ -26,3 +29,9 @@ pub fn take_settings_changed() -> bool {
 
 #[cfg(not(all(windows, feature = "sdk")))]
 pub fn suppress_settings_notify_briefly() {}
+
+#[cfg(not(all(windows, feature = "sdk")))]
+pub fn begin_capture_wait() {}
+
+#[cfg(not(all(windows, feature = "sdk")))]
+pub fn request_capture_cancel() {}
