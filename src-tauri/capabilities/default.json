@@ -5,6 +5,8 @@
   "permissions": [
     "core:default",
     "dialog:default",
+    "updater:default",
+    "process:default",
     "allow-get-app-status",
     "allow-set-demo-mode",
     "allow-set-log-level",
