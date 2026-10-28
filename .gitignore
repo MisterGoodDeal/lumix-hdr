@@ -9,6 +9,9 @@ dist
 # SDK Panasonic (licence non vérifiée, ne jamais committer)
 /vendor/
 
+# Clés de signature updater (jamais committer)
+.secrets/
+
 # OS
 .DS_Store
 Thumbs.db
