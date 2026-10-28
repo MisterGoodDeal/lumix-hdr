@@ -1,11 +1,10 @@
 export type LogLevel = "error" | "warn" | "info" | "debug" | "trace";
 
-export type Screen =
-  | "connexion"
-  | "prise-de-vue"
-  | "resultat"
-  | "historique"
-  | "reglages";
+export type LocalePreference = "system" | "en" | "fr";
+
+export type ThemePreference = "system" | "dark" | "light";
+
+export type Screen = "studio" | "resultat" | "historique" | "reglages";
 
 export type FusionMethod = "mertens" | "debevec";
 
@@ -45,6 +44,19 @@ export const DEFAULT_FUSION_OPTIONS: FusionOptions = {
   jpeg_quality: 95,
 };
 
+export type CaptureDefaults = {
+  session_name: string;
+  frame_count: number;
+  step_ev: number;
+  center_ev: number;
+};
+
+export type CameraDefaults = {
+  iso: number;
+  aperture: number;
+  shutter_seconds: number;
+};
+
 export type AppStatus = {
   version: string;
   os: string;
@@ -52,14 +64,36 @@ export type AppStatus = {
   demo_forced_by_env: boolean;
   camera_available: boolean;
   log_level: LogLevel;
+  locale: LocalePreference;
+  theme: ThemePreference;
   log_dir: string;
   sessions_dir: string;
+  sessions_dir_custom: boolean;
   fusion: FusionOptions;
+  capture: CaptureDefaults;
+  camera: CameraDefaults;
+};
+
+export type ExposureCapabilities = {
+  settings: CameraSettingsDto;
+  iso_values: number[];
+  aperture_values: number[];
+  shutter_seconds: number[];
+  shutter_labels: string[];
+};
+
+export type LiveViewFrame = {
+  jpeg_base64: string;
 };
 
 export type AppError = {
   message: string;
   detail?: string;
+};
+
+export type CameraDeviceInfo = {
+  index: number;
+  model: string;
 };
 
 export type BracketRequest = {
@@ -119,11 +153,21 @@ export type CaptureSessionResult = {
   originals: string[];
 };
 
-export const DEFAULT_BRACKET_REQUEST: BracketRequest = {
+export const DEFAULT_CAPTURE_DEFAULTS: CaptureDefaults = {
+  session_name: "hdr",
   frame_count: 5,
   step_ev: 1,
   center_ev: 0,
-  session_name: "hdr",
+};
+
+export const DEFAULT_CAMERA_DEFAULTS: CameraDefaults = {
+  iso: 200,
+  aperture: 2.8,
+  shutter_seconds: 1 / 60,
+};
+
+export const DEFAULT_BRACKET_REQUEST: BracketRequest = {
+  ...DEFAULT_CAPTURE_DEFAULTS,
 };
 
 export const FRAME_COUNT_OPTIONS = [3, 5, 7, 9] as const;
