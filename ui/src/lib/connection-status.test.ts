@@ -16,6 +16,7 @@ function status(overrides: Partial<AppStatus> = {}): AppStatus {
     camera_available: false,
     log_level: "info",
     log_dir: "/tmp/logs",
+    sessions_dir: "/tmp/sessions",
     fusion: DEFAULT_FUSION_OPTIONS,
     ...overrides,
   };

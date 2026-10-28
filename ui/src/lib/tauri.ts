@@ -19,6 +19,7 @@ const MOCK_STATUS: AppStatus = {
   camera_available: false,
   log_level: "info",
   log_dir: "(navigateur — hors application Tauri)",
+  sessions_dir: "(navigateur — hors application Tauri)",
   fusion: DEFAULT_FUSION_OPTIONS,
 };
 
