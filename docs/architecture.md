@@ -65,7 +65,7 @@ vcpkg install opencv4[jpeg,png,tiff]:x64-windows-static-md
 
 Renseigner `OpenCV_DIR` vers `installed/x64-windows-static-md/share/opencv4` et `LIBCLANG_PATH` vers le dossier contenant `libclang.dll`.
 
-## Commandes Tauri (phase 2)
+## Commandes Tauri (phases 2–5)
 
 | Commande | Rôle |
 | --- | --- |
@@ -74,5 +74,31 @@ Renseigner `OpenCV_DIR` vers `installed/x64-windows-static-md/share/opencv4` et 
 | `cancel_fusion` | Pose le drapeau d’annulation coopérative |
 | `set_fusion_options` | Enregistre alignement / méthode / formats |
 | `open_path` | Ouvre le fichier ou le dossier dans l’explorateur |
+| `preview_bracket_plan` / `start_capture` / `cancel_capture` | Bracketing (Mock ou SDK) |
+| `list_cameras` / `connect_camera` / `disconnect_camera` | Session PnP LUMIX (ou Mock en démo) |
+| `get_camera_settings` / `set_camera_settings` | ISO / f / SS + capacités pour steppers |
+| `set_capture_defaults` | Persiste bracketing dans `config.json` |
+| `start_live_view` / `stop_live_view` | Flux JPEG Live View (`liveview-frame`) |
 
-L’aperçu JPEG utilise le protocole `asset:` (`convertFileSrc`).
+L’aperçu JPEG utilise le protocole `asset:` (`convertFileSrc`). Live View : event `liveview-frame` (base64). Unplug : `camera-disconnected`.
+
+UI : onglet **Studio** (connexion + preview + overlays +/- + bracketing).
+
+## SDK LUMIX (phase 4, Windows)
+
+```
+App / lumix-probe
+        │
+        ▼
+ crates/lumix-sys (shim C++ extern "C", cc + MSVC)
+        │
+        ▼
+ Lmxptpif.dll / .lib  (vendor/lumix-sdk/Library, gitignoré)
+```
+
+- Ne pas bindgen directement les headers (args C++ par défaut) : wrappers dans `crates/lumix-sys/shim/`.
+- Encodage vitesse : codes PTP LUMIX (`SupportVal` via `SS_Get_Capability`) ; décodage doc/sample (`≤1s` → dénominateur×1000, `≥1s` → secondes×1000 `| 0x80000000`).
+- Ouverture : F×10. Mode bracketing : `MODE_POS_M`. Déclenchement : `Rec_Ctrl_Release` oneshot + callback `OBJCT_REQ_TRNSFER` + `Get_Partial_ObjectEx` (JPEG) ; RAW → `Skip_Object_Transfer`.
+- Live View : `Ctrl_LiveView_Start/Stop` + `Get_LiveView_data` (helper shim JPEG) ; pause pendant le bracket.
+- Smoke test : `cargo run -p lumix-probe` avec `Lmxptpif.dll` dans le `PATH` ou à côté du binaire. Le `build.rs` Tauri copie la DLL vers `target/<profile>/` si le SDK est trouvé.
+- Variable optionnelle : `LUMIX_SDK_DIR` (racine du SDK). **Ne jamais committer** `vendor/` ni la DLL.

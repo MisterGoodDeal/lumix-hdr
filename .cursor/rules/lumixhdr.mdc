@@ -5,7 +5,9 @@ alwaysApply: true
 
 Lis `AGENTS.md` à la racine avant toute modification. C’est la source de reprise.
 
-- Réponds en français. Yarn, pas pnpm. Tauri 2.12, OpenCV 4, pas de SDK avant la phase 4.
-- Aucun `unwrap`/`expect` hors tests. N’invente jamais l’API LUMIX. Ne committe pas `vendor/`.
-- Phase 1–3 faites. Phase 3 = MockCamera + capture + UI Prise de vue (mode démo). Pas le SDK avant la phase 4.
-- Le GH6 invisible est normal : `camera_available` est `cfg!(windows)` et aucun SDK n’est chargé.
+- Réponds en français. Yarn, pas pnpm. Tauri 2.12, OpenCV 4. SDK = phase 4 (faite) via `vendor/lumix-sdk` gitignoré.
+- Aucun `unwrap`/`expect` hors tests. N’invente jamais l’API LUMIX. Ne committe pas `vendor/` ni la DLL.
+- Phases 1–5 faites (Studio + Live View). Phase 6 = historique / release. Sur Windows : fusion OpenCV + MockCamera (démo) ou LumixCamera (hors démo).
+- UI i18n FR/EN (`ui/src/i18n`), locale `system|en|fr` (défaut système, anglais sinon).
+- Thème `system|dark|light` (`ui/src/theme`).
+- `camera_available` est `cfg!(windows)` ; absence de GH6 PnP ≠ bug UI.
