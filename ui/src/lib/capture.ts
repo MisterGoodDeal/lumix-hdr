@@ -62,7 +62,8 @@ export async function onCaptureProgress(
 
 export function captureStateLabel(progress: CaptureProgress | null): string {
   if (!progress) {
-    return "En attente";
+    // Lazy import avoided — caller UI already i18n-aware; keep neutral.
+    return "…";
   }
   return progress.message || progress.state.kind;
 }

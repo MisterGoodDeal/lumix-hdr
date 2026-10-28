@@ -1,11 +1,12 @@
+import { t } from "../i18n";
 import type { FusionMethod, TonemapKind } from "../types";
 
 export function fusionMethodLabel(method: FusionMethod): string {
   switch (method) {
     case "mertens":
-      return "Mertens (naturel)";
+      return t("fusion.mertens");
     case "debevec":
-      return "Debevec + tone mapping";
+      return t("fusion.debevec");
   }
 }
 
@@ -20,10 +21,10 @@ export function tonemapLabel(kind: TonemapKind): string {
 
 export function jpegCountLabel(count: number): string {
   if (count === 0) {
-    return "Aucun JPEG";
+    return t("fusion.jpegNone");
   }
   if (count === 1) {
-    return "1 JPEG — il en faut au moins deux";
+    return t("fusion.jpegOne");
   }
-  return `${count} JPEG prêts à fusionner`;
+  return t("fusion.jpegMany", { count });
 }
