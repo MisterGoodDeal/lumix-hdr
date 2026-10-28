@@ -6,3 +6,23 @@ body,
 #root {
   min-height: 100%;
 }
+
+/* Inputs / selects : moins de contraste que le défaut HeroUI */
+.dark,
+[data-theme="dark"] {
+  --field-background: oklch(15.5% 0.005 285.823);
+  --field-foreground: color-mix(in oklab, var(--foreground) 78%, var(--muted) 22%);
+  --field-placeholder: color-mix(in oklab, var(--muted) 80%, transparent);
+  --default: oklch(20% 0.005 286.033);
+  --default-foreground: color-mix(in oklab, var(--snow) 86%, var(--muted) 14%);
+  --border: oklch(24% 0.005 286.033);
+}
+
+.default,
+[data-theme="default"] {
+  --field-background: oklch(97.5% 0.001 286);
+  --field-foreground: color-mix(in oklab, var(--foreground) 80%, var(--muted) 20%);
+  --field-placeholder: color-mix(in oklab, var(--muted) 85%, transparent);
+  --default: oklch(96% 0.001 286);
+  --border: oklch(90% 0.002 286);
+}
