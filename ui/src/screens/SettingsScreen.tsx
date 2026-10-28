@@ -1,19 +1,28 @@
+import { useState } from "react";
 import {
   Button,
   Card,
   Description,
   Label,
   ListBox,
+  ProgressBar,
   Select,
   Switch,
   Tooltip,
+  toast,
 } from "@heroui/react";
 
 import { ErrorDetails } from "../components/ErrorDetails";
 import { isLocalePreference } from "../i18n";
 import { useT } from "../i18n/react";
 import { fusionMethodLabel } from "../lib/fusion";
-import { isTauri, openPath, pickSessionsFolder } from "../lib/tauri";
+import { isTauri, openPath, parseAppError, pickSessionsFolder } from "../lib/tauri";
+import {
+  checkForAppUpdate,
+  downloadAndInstallAppUpdate,
+  updateProgressPercent,
+  type AvailableUpdate,
+} from "../lib/updater";
 import { useAppStore } from "../store/app-store";
 import { isThemePreference } from "../theme";
 import type {
@@ -37,6 +46,13 @@ export function SettingsScreen() {
   const setLocale = useAppStore((state) => state.setLocale);
   const setTheme = useAppStore((state) => state.setTheme);
   const setSessionsDir = useAppStore((state) => state.setSessionsDir);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateInstalling, setUpdateInstalling] = useState(false);
+  const [availableUpdate, setAvailableUpdate] = useState<AvailableUpdate | null>(
+    null,
+  );
+  const [updateChecked, setUpdateChecked] = useState(false);
+  const [downloadPercent, setDownloadPercent] = useState<number | null>(null);
 
   if (!status) {
     return (
@@ -86,6 +102,54 @@ export function SettingsScreen() {
     }
   }
 
+  async function onCheckUpdate() {
+    if (!isTauri() || updateBusy) {
+      return;
+    }
+    setUpdateBusy(true);
+    setUpdateChecked(false);
+    setAvailableUpdate(null);
+    try {
+      const found = await checkForAppUpdate();
+      setAvailableUpdate(found);
+      setUpdateChecked(true);
+      if (found) {
+        toast.success(t("settings.update.available", { version: found.version }));
+      } else {
+        toast.success(t("settings.update.upToDate"));
+      }
+    } catch (caught) {
+      const parsed = parseAppError(caught);
+      toast.danger(t("settings.update.checkFail"), {
+        description: parsed.message,
+      });
+    } finally {
+      setUpdateBusy(false);
+    }
+  }
+
+  async function onInstallUpdate() {
+    if (!isTauri() || updateBusy || !availableUpdate) {
+      return;
+    }
+    setUpdateBusy(true);
+    setUpdateInstalling(true);
+    setDownloadPercent(0);
+    try {
+      await downloadAndInstallAppUpdate((progress) => {
+        setDownloadPercent(updateProgressPercent(progress));
+      });
+    } catch (caught) {
+      const parsed = parseAppError(caught);
+      toast.danger(t("settings.update.installFail"), {
+        description: parsed.message,
+      });
+      setUpdateBusy(false);
+      setUpdateInstalling(false);
+      setDownloadPercent(null);
+    }
+  }
+
   return (
     <Card className="max-w-xl">
       <Card.Header>
@@ -95,6 +159,59 @@ export function SettingsScreen() {
         </Card.Description>
       </Card.Header>
       <Card.Content className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <Label>{t("settings.update.title")}</Label>
+          <Description>{t("settings.update.hint")}</Description>
+          {updateChecked && availableUpdate ? (
+            <Description>
+              {t("settings.update.found", { version: availableUpdate.version })}
+            </Description>
+          ) : null}
+          {updateInstalling ? (
+            <ProgressBar
+              aria-label={t("settings.update.downloading")}
+              value={downloadPercent ?? 0}
+              minValue={0}
+              maxValue={100}
+            >
+              <Label>{t("settings.update.downloading")}</Label>
+              <ProgressBar.Track>
+                <ProgressBar.Fill />
+              </ProgressBar.Track>
+              <ProgressBar.Output />
+            </ProgressBar>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              isDisabled={!isTauri() || updateBusy}
+              onPress={() => {
+                void onCheckUpdate();
+              }}
+            >
+              {updateBusy && !updateInstalling
+                ? t("settings.update.checking")
+                : t("settings.update.check")}
+            </Button>
+            <Button
+              size="sm"
+              variant="primary"
+              isDisabled={!isTauri() || updateBusy || !availableUpdate}
+              onPress={() => {
+                void onInstallUpdate();
+              }}
+            >
+              {updateInstalling
+                ? t("settings.update.installing")
+                : t("settings.update.install")}
+            </Button>
+          </div>
+          {!isTauri() ? (
+            <Description>{t("settings.update.tauriOnly")}</Description>
+          ) : null}
+        </div>
+
         <Select
           selectedKey={status.locale}
           onSelectionChange={(key) => {
