@@ -101,7 +101,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ demoConnected: true });
     toast.success("Mode démo", {
       description:
-        "Aucune connexion à un appareil réel n'a été tentée. L'interface est prête pour les phases suivantes.",
+        "MockCamera prête. Aucune connexion à un appareil réel n'a été tentée.",
     });
   },
 }));

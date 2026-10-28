@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Spinner, Tabs, Toast } from "@heroui/react";
 
+import { CaptureScreen } from "./screens/CaptureScreen";
 import { ConnectionScreen } from "./screens/ConnectionScreen";
 import { PlaceholderScreen } from "./screens/PlaceholderScreen";
 import { ResultScreen } from "./screens/ResultScreen";
@@ -67,10 +68,7 @@ export default function App() {
               <ConnectionScreen />
             </Tabs.Panel>
             <Tabs.Panel id="prise-de-vue">
-              <PlaceholderScreen
-                title="Prise de vue"
-                description="La live view, les réglages rapides et le déclenchement de série arriveront à la phase 3."
-              />
+              <CaptureScreen />
             </Tabs.Panel>
             <Tabs.Panel id="resultat">
               <ResultScreen />
