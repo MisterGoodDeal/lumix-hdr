@@ -1,6 +1,6 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { open } from "@tauri-apps/plugin-dialog";
+import { ask, open } from "@tauri-apps/plugin-dialog";
 
 import type {
   AppError,
@@ -15,6 +15,8 @@ import type {
   LiveViewFrame,
   LocalePreference,
   LogLevel,
+  SessionDetail,
+  SessionSummary,
   ThemePreference,
 } from "../types";
 import { t } from "../i18n";
@@ -106,7 +108,7 @@ export async function connectCamera(
     return { index: 0, model: "MockCamera (navigateur)" };
   }
   return call<CameraDeviceInfo>("connect_camera", {
-    device_index: deviceIndex ?? null,
+    deviceIndex: deviceIndex ?? null,
   });
 }
 
@@ -253,6 +255,70 @@ export async function setSessionsDir(
     };
   }
   return call<AppStatus>("set_sessions_dir", { path });
+}
+
+export async function listSessions(): Promise<SessionSummary[]> {
+  if (!isTauri()) {
+    return [
+      {
+        session_dir: "/demo/sessions/2026-10-28_120000_hdr",
+        created_at: "2026-10-28T12:00:00+01:00",
+        session_name: "hdr",
+        frame_count: 5,
+        step_ev: 1,
+        center_ev: 0,
+        state_kind: "done",
+        thumb_jpeg: null,
+        has_fused: true,
+        original_count: 5,
+        error_count: 0,
+      },
+    ];
+  }
+  return call<SessionSummary[]>("list_sessions");
+}
+
+export async function getSession(sessionDir: string): Promise<SessionDetail> {
+  if (!isTauri()) {
+    return {
+      session_dir: sessionDir,
+      created_at: "2026-10-28T12:00:00+01:00",
+      session_name: "hdr",
+      app_version: "0.1.0",
+      state: { kind: "done" },
+      errors: [],
+      frame_count: 5,
+      step_ev: 1,
+      center_ev: 0,
+      base_iso: 200,
+      base_aperture: 2.8,
+      base_shutter_label: "1/60",
+      originals: [],
+      original_paths: [],
+      fused_jpeg: null,
+      before_jpeg: null,
+      slots: [],
+    };
+  }
+  // Tauri 2 : args en camelCase (session_dir → sessionDir).
+  return call<SessionDetail>("get_session", { sessionDir });
+}
+
+export async function deleteSession(sessionDir: string): Promise<void> {
+  if (!isTauri()) {
+    return;
+  }
+  await call<void>("delete_session", { sessionDir });
+}
+
+export async function confirmDeleteSession(sessionName: string): Promise<boolean> {
+  if (!isTauri()) {
+    return window.confirm(t("history.deleteConfirm", { name: sessionName }));
+  }
+  return ask(t("history.deleteConfirm", { name: sessionName }), {
+    title: t("history.deleteTitle"),
+    kind: "warning",
+  });
 }
 
 export async function pickImageFolder(): Promise<string | null> {
