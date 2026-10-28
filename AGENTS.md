@@ -2,15 +2,15 @@
 
 Lis ce fichier en premier. Réponds en **français**. Travaille **par phases** : ne commence pas la suivante tant que la courante n’est pas verte (fmt, clippy `-D warnings`, `cargo test --all`, `yarn lint`, `yarn typecheck`, `yarn test`).
 
-## Où on en est (2026-10-27)
+## Où on en est (2026-10-28)
 
 Branche : `main` (poussée). Version `0.1.0`.
 
 | Phase | Statut |
 | --- | --- |
 | 1 — Squelette Tauri 2 + React 19 + HeroUI v3 + Yarn | **faite** |
-| 2 — `crates/hdr-core` + fusion d’un dossier JPEG | **faite** (tests synthétiques OK sur macOS) |
-| 3 — `capture` + `MockCamera` + écran Prise de vue | **à faire ensuite** |
+| 2 — `crates/hdr-core` + fusion d’un dossier JPEG | **faite** (tests synthétiques + dossier GH6 OK Windows) |
+| 3 — `capture` + `MockCamera` + écran Prise de vue | **faite** (MockCamera only ; mode démo requis) |
 | 4 — SDK LUMIX (`lumix-sys` / `LumixCamera` / `lumix-probe`) | plus tard |
 | 5 — Live view UI | plus tard |
 | 6 — Historique, release, comparaison avant/après | plus tard |
@@ -20,30 +20,17 @@ Branche : `main` (poussée). Version `0.1.0`.
 ## Première chose sur Windows
 
 1. `git pull`
-2. Installer **LLVM** (libclang) et **OpenCV 4** via vcpkg, voir [`docs/architecture.md`](docs/architecture.md) :
+2. LLVM + OpenCV 4 via vcpkg déjà OK sur cette machine (`VCPKG_ROOT`, `OpenCV_DIR`, `LIBCLANG_PATH`, `VCPKGRS_TRIPLET`).
+3. `yarn install` puis `cargo test --all` / `yarn tauri dev`
+4. Mode démo → Connexion → Connecter → **Prise de vue** (MockCamera). Fusion manuelle = écran **Résultat**.
 
-```text
-vcpkg install opencv4[jpeg,png,tiff]:x64-windows-static-md
-```
+## Phase 3 (faite)
 
-   Puis `OpenCV_DIR` → `installed\x64-windows-static-md\share\opencv4` et `LIBCLANG_PATH` vers le dossier de `libclang.dll`.
+Crates `lumix` + `capture`. Commandes Tauri : `preview_bracket_plan`, `start_capture`, `cancel_capture` + événement `capture-progress`. Sessions sous `app_data/sessions/`.
 
-3. `yarn install` (Yarn 1.22.22, **pas pnpm**)
-4. `cargo test --all` puis `yarn tauri dev`
-5. Vérifier l’écran **Résultat** avec un vrai dossier de JPEG GH6 (AlignMTB + Mertens). Si OpenCV / vcpkg bloque, corrige ça avant la phase 3.
+## Phase 4 (prochain travail)
 
-## Phase 3 (prochain travail)
-
-Crates `lumix` + `capture` (pas `lumix-sys` : ça c’est la phase 4).
-
-- Trait `Camera` + **`MockCamera`** uniquement. Images synthétiques dont la luminosité suit l’expo simulée. Injection d’erreurs (busy, timeout, déco).
-- Machine à états : `Idle → Preparing → (SetExposure → VerifyExposure → Trigger → WaitCaptureDone → Download → VerifyFile) × N → Restoring → Merging → Done`, plus `Aborted` / `Failed { step, error }`.
-- Plan : N ∈ {3,5,7,9}, écart IL ∈ {1/3 … 3}, centre −3…+3 IL. Défaut : mode **M**, ISO et ouverture fixes, on varie la **vitesse**. Refuser le plan si une vitesse sort de la plage.
-- Sauvegarder les réglages avant, **restaurer toujours** (succès / échec / annulation).
-- Dossier `AAAA-MM-JJ_HHMMSS_<nom>/` + originaux + JPEG fusionné via `hdr-core` + `manifest.json` (plan, hashes SHA-256, version, erreurs). Jamais d’écrasement.
-- UI **Prise de vue** (HeroUI, français) : réglages rapides, aperçu du plan, Déclencher / Annuler, Progress. Live view réelle = phase 5 ; en démo, aperçu factice suffit.
-- Espace = déclencher, Échap = annuler.
-- Tests : calcul du plan, transitions, restauration après échec, annulation, déco simulée.
+SDK LUMIX réel (`lumix-sys` / `LumixCamera` / `lumix-probe`). Ne pas inventer l’API.
 
 ## Interdits
 
@@ -56,7 +43,7 @@ Crates `lumix` + `capture` (pas `lumix-sys` : ça c’est la phase 4).
 ## Stack épinglée
 
 - Rust 1.99.1 (`rust-toolchain.toml`), édition 2021
-- Workspace : `src-tauri`, `crates/hdr-core`
+- Workspace : `src-tauri`, `crates/hdr-core`, `crates/lumix`, `crates/capture`
 - `opencv` 0.101.1, features `clang-runtime`, `imgcodecs`, `imgproc`, `photo`
 - Factories OpenCV 4.14 : `create_align_mtb_def`, `create_merge_mertens`, `create_merge_debevec`, `create_tonemap_reinhard_def` — **pas** `Type::create()`
 - Encodage fichier : `imencode` (un `.tmp` n’a pas d’écrivain OpenCV)
@@ -71,9 +58,9 @@ Crates `lumix` + `capture` (pas `lumix-sys` : ça c’est la phase 4).
 
 ## Commandes Tauri déjà là
 
-`get_app_status`, `set_demo_mode`, `set_log_level`, `get_log_dir`, `set_fusion_options`, `list_jpeg_folder`, `merge_image_folder`, `cancel_fusion`, `open_path`. Événement `fusion-progress` (`f32`). Permissions dans `src-tauri/permissions/commands.toml`.
+`get_app_status`, `set_demo_mode`, `set_log_level`, `get_log_dir`, `set_fusion_options`, `list_jpeg_folder`, `merge_image_folder`, `cancel_fusion`, `open_path`, `preview_bracket_plan`, `start_capture`, `cancel_capture`. Événements `fusion-progress` (`f32`) et `capture-progress` (`CaptureProgress`). Permissions dans `src-tauri/permissions/commands.toml`.
 
-Mode démo : réglage persisté **ou** `LUMIX_HDR_DEMO=1`.
+Mode démo : réglage persisté **ou** `LUMIX_HDR_DEMO=1`. Prise de vue phase 3 exige le mode démo (MockCamera).
 
 ## Git
 

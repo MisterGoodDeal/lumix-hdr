@@ -22,7 +22,8 @@ yarn tauri dev
 2. L’écran **Connexion** indique si le pilotage caméra est disponible (Windows uniquement).
 3. Activer le **mode démo** dans Réglages pour parcourir l’interface sans appareil.
 4. L’écran **Résultat** fusionne un dossier de JPEG (AlignMTB + Mertens, Debevec en option) sans appareil.
-5. Les écrans Prise de vue et Historique arriveront plus tard.
+5. L’écran **Prise de vue** (mode démo) enchaîne un bracketing MockCamera puis la fusion.
+6. L’écran Historique arrivera à la phase 6.
 
 ## Mode démo
 
