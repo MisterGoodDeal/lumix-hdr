@@ -10,7 +10,7 @@ import { Button, Spinner, Toast } from "@heroui/react";
 
 import type { TranslationKey } from "./i18n";
 import { useT } from "./i18n/react";
-import { PlaceholderScreen } from "./screens/PlaceholderScreen";
+import { HistoryScreen } from "./screens/HistoryScreen";
 import { ResultScreen } from "./screens/ResultScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { StudioScreen } from "./screens/StudioScreen";
@@ -52,12 +52,7 @@ export default function App() {
           <>
             {screen === "studio" ? <StudioScreen /> : null}
             {screen === "resultat" ? <ResultScreen /> : null}
-            {screen === "historique" ? (
-              <PlaceholderScreen
-                title={t("nav.history")}
-                description={t("app.historySoon")}
-              />
-            ) : null}
+            {screen === "historique" ? <HistoryScreen /> : null}
             {screen === "reglages" ? <SettingsScreen /> : null}
           </>
         )}
