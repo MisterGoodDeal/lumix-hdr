@@ -12,7 +12,8 @@
     "lint": "yarn workspace ui lint",
     "typecheck": "yarn workspace ui typecheck",
     "test": "yarn workspace ui test",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "sync-version": "node scripts/sync-version.mjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.9.6"
