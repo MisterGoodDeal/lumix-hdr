@@ -12,6 +12,7 @@ import {
 } from "@heroui/react";
 
 import { ErrorDetails } from "../components/ErrorDetails";
+import { useT } from "../i18n/react";
 import { fusionMethodLabel, jpegCountLabel, tonemapLabel } from "../lib/fusion";
 import {
   cancelFusion,
@@ -28,6 +29,7 @@ import { useAppStore } from "../store/app-store";
 import type { AppError, FusionMethod, FusionOutputs, TonemapKind } from "../types";
 
 export function ResultScreen() {
+  const t = useT();
   const status = useAppStore((state) => state.status);
   const error = useAppStore((state) => state.error);
   const setFusionOptions = useAppStore((state) => state.setFusionOptions);
@@ -60,8 +62,8 @@ export function ResultScreen() {
     return (
       <Card className="max-w-xl">
         <Card.Header>
-          <Card.Title>Résultat</Card.Title>
-          <Card.Description>Chargement…</Card.Description>
+          <Card.Title>{t("result.title")}</Card.Title>
+          <Card.Description>{t("common.loading")}</Card.Description>
         </Card.Header>
       </Card>
     );
@@ -111,19 +113,16 @@ export function ResultScreen() {
     <div className="flex max-w-5xl flex-col gap-4 lg:flex-row">
       <Card className="flex-1">
         <Card.Header>
-          <Card.Title>Résultat</Card.Title>
-          <Card.Description>
-            Fusionnez un dossier de JPEG sans appareil. La comparaison
-            avant/après détaillée arrivera plus tard.
-          </Card.Description>
+          <Card.Title>{t("result.title")}</Card.Title>
+          <Card.Description>{t("result.desc")}</Card.Description>
         </Card.Header>
         <Card.Content className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <Button variant="secondary" onPress={() => void chooseFolder()}>
-              Choisir un dossier
+              {t("result.pickFolder")}
             </Button>
             <p className="break-all text-sm text-muted">
-              {folder ?? "Aucun dossier sélectionné"}
+              {folder ?? t("result.noFolder")}
             </p>
             {folder ? (
               <Description>{jpegCountLabel(files.length)}</Description>
@@ -140,7 +139,7 @@ export function ResultScreen() {
               <Switch.Control>
                 <Switch.Thumb />
               </Switch.Control>
-              Aligner les images (AlignMTB)
+              {t("result.align")}
             </Switch.Content>
           </Switch>
 
@@ -155,7 +154,7 @@ export function ResultScreen() {
               }
             }}
           >
-            <Label>Méthode de fusion</Label>
+            <Label>{t("result.method")}</Label>
             <Select.Trigger>
               <Select.Value />
               <Select.Indicator />
@@ -188,7 +187,7 @@ export function ResultScreen() {
                 }
               }}
             >
-              <Label>Tone mapping</Label>
+              <Label>{t("result.tonemap")}</Label>
               <Select.Trigger>
                 <Select.Value />
                 <Select.Indicator />
@@ -220,7 +219,7 @@ export function ResultScreen() {
               <Switch.Control>
                 <Switch.Thumb />
               </Switch.Control>
-              JPEG qualité 95
+              {t("result.jpeg")}
             </Switch.Content>
           </Switch>
 
@@ -234,7 +233,7 @@ export function ResultScreen() {
               <Switch.Control>
                 <Switch.Thumb />
               </Switch.Control>
-              TIFF 16 bits
+              {t("result.tiff")}
             </Switch.Content>
           </Switch>
 
@@ -244,7 +243,7 @@ export function ResultScreen() {
               isDisabled={!canMerge}
               onPress={() => void runMerge()}
             >
-              Fusionner
+              {t("result.merge")}
             </Button>
             <Button
               variant="secondary"
@@ -253,7 +252,7 @@ export function ResultScreen() {
                 void cancelFusion();
               }}
             >
-              Annuler
+              {t("common.cancel")}
             </Button>
           </div>
 
@@ -263,7 +262,7 @@ export function ResultScreen() {
               minValue={0}
               maxValue={100}
             >
-              <Label>Progression</Label>
+              <Label>{t("result.progress")}</Label>
               <ProgressBar.Track>
                 <ProgressBar.Fill />
               </ProgressBar.Track>
@@ -272,10 +271,7 @@ export function ResultScreen() {
           ) : null}
 
           {!isTauri() ? (
-            <Description>
-              Dans le navigateur, le choix de dossier et la fusion sont
-              simulés. Relancez via Yarn Tauri pour un vrai OpenCV.
-            </Description>
+            <Description>{t("result.browserPreview")}</Description>
           ) : null}
 
           <ErrorDetails error={mergeError ?? error} />
@@ -284,29 +280,29 @@ export function ResultScreen() {
 
       <Card className="flex-1">
         <Card.Header>
-          <Card.Title>Aperçu</Card.Title>
+          <Card.Title>{t("result.preview")}</Card.Title>
           <Card.Description>
             {result
-              ? `${result.image_count} images · ${fusionMethodLabel(result.method)}`
-              : "Aucun résultat pour l'instant"}
+              ? t("result.previewCount", {
+                  count: result.image_count,
+                  method: fusionMethodLabel(result.method),
+                })
+              : t("result.noneYet")}
           </Card.Description>
         </Card.Header>
         <Card.Content className="flex flex-col gap-4">
           {preview ? (
             <img
               src={preview}
-              alt="Résultat HDR fusionné"
+              alt={t("studio.resultAlt")}
               className="max-h-[480px] w-full rounded-lg object-contain bg-black/40"
             />
           ) : result?.jpeg ? (
             <p className="text-sm text-muted">
-              Fichier écrit : {result.jpeg}
+              {t("result.written", { path: result.jpeg })}
             </p>
           ) : (
-            <p className="text-muted">
-              Choisissez un dossier contenant au moins deux JPEG, puis lancez
-              la fusion.
-            </p>
+            <p className="text-muted">{t("result.emptyHint")}</p>
           )}
           {result?.jpeg || result?.tiff || folder ? (
             <Button
@@ -317,7 +313,7 @@ export function ResultScreen() {
                 }
               }}
             >
-              Ouvrir le dossier
+              {t("result.openFolder")}
             </Button>
           ) : null}
         </Card.Content>

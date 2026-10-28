@@ -1,5 +1,6 @@
 import { Accordion } from "@heroui/react";
 
+import { useT } from "../i18n/react";
 import type { AppError } from "../types";
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 };
 
 export function ErrorDetails({ error }: Props) {
+  const t = useT();
   if (!error) {
     return null;
   }
@@ -19,7 +21,7 @@ export function ErrorDetails({ error }: Props) {
           <Accordion.Item id="detail">
             <Accordion.Heading>
               <Accordion.Trigger>
-                Détail technique
+                {t("common.details")}
                 <Accordion.Indicator />
               </Accordion.Trigger>
             </Accordion.Heading>
