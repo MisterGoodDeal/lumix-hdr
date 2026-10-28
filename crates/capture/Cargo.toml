@@ -1,0 +1,17 @@
+[package]
+name = "capture"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Bracketing d'exposition, session et fusion HDR"
+
+[dependencies]
+chrono = { version = "0.4.42", default-features = false, features = ["clock", "std"] }
+hdr-core = { path = "../hdr-core" }
+lumix = { path = "../lumix" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+sha2 = "0.10.9"
+thiserror = "2.0.17"
+tracing = "0.1.41"
