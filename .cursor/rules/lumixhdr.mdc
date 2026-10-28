@@ -5,7 +5,7 @@ alwaysApply: true
 
 Lis `AGENTS.md` à la racine avant toute modification. C’est la source de reprise.
 
-- Réponds en français. Yarn, pas pnpm. Tauri 2.12, OpenCV 4. SDK = phase 4 (faite) via `vendor/lumix-sdk` gitignoré.
+- Réponds en français. Yarn, pas pnpm. Tauri 2.12, OpenCV 4, LLVM/Clang ≥ 20 sur Windows (VS 2026). SDK = phase 4 via `vendor/lumix-sdk` gitignoré.
 - Aucun `unwrap`/`expect` hors tests. N’invente jamais l’API LUMIX. Ne committe pas `vendor/` ni la DLL.
 - Phases 1–6 faites. Phase 7 release (NSIS + updater GitHub, `docs/release.md`) en cours. Sur Windows : fusion OpenCV + MockCamera (démo) ou LumixCamera (hors démo).
 - UI i18n FR/EN (`ui/src/i18n`), locale `system|en|fr` (défaut système, anglais sinon).

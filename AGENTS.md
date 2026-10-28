@@ -21,7 +21,7 @@ Branche : `main`. Version `0.1.0`.
 ## Première chose sur Windows
 
 1. `git pull`
-2. LLVM + OpenCV 4 via vcpkg (`VCPKG_ROOT`, `OpenCV_DIR`, `LIBCLANG_PATH`, `VCPKGRS_TRIPLET`).
+2. LLVM **20+** (VS 2026 / images `windows-2025` : Clang 18 → erreur STL1000) + OpenCV 4 via vcpkg (`VCPKG_ROOT`, `OpenCV_DIR`, `LIBCLANG_PATH`, `VCPKGRS_TRIPLET`).
 3. SDK LUMIX dans `vendor/lumix-sdk/` (**gitignoré**, ne jamais committer) : `Library/Lmxptpif.dll`, `Lmxptpif.lib`, headers. Optionnel : `LUMIX_SDK_DIR`.
 4. `yarn install` puis `cargo test --all` / `yarn tauri dev`
 5. Mode démo → MockCamera **ou** hors démo → Studio → Connecter (PnP) → Live View + bracketing.

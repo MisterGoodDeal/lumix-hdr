@@ -18,7 +18,8 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+  # x-gha retiré de vcpkg — cache fichiers + actions/cache (évite ~1 h de rebuild OpenCV).
+  VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/.vcpkg-cache,readwrite"
 
 jobs:
   windows:
@@ -45,26 +46,35 @@ jobs:
         with:
           toolchain: 1.99.1
 
-      - name: Exporter le cache binaire vcpkg
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
+      # VS 2026 (windows-2025) : Clang ≥ 20 requis pour opencv-binding-generator (STL1000).
       - name: Installer LLVM
         uses: KyleMayes/install-llvm-action@v2
         with:
-          version: "18.1.8"
+          version: "20.1.8"
+
+      - name: Préparer le cache binaire vcpkg
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE/.vcpkg-cache" | Out-Null
+
+      - name: Restaurer le cache vcpkg (OpenCV)
+        uses: actions/cache@v4
+        with:
+          path: |
+            .vcpkg-cache
+            vcpkg/installed
+          key: vcpkg-opencv4-jpeg-png-tiff-x64-static-md-v1
 
       - name: Installer OpenCV via vcpkg
         shell: pwsh
         run: |
-          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$env:RUNNER_TEMP/vcpkg"
-          & "$env:RUNNER_TEMP/vcpkg/bootstrap-vcpkg.bat" -disableMetrics
-          & "$env:RUNNER_TEMP/vcpkg/vcpkg" install "opencv4[jpeg,png,tiff]:x64-windows-static-md"
-          echo "VCPKG_ROOT=$env:RUNNER_TEMP/vcpkg" >> $env:GITHUB_ENV
-          echo "OpenCV_DIR=$env:RUNNER_TEMP/vcpkg/installed/x64-windows-static-md/share/opencv4" >> $env:GITHUB_ENV
+          $root = Join-Path $env:GITHUB_WORKSPACE "vcpkg"
+          if (-not (Test-Path "$root/vcpkg.exe")) {
+            git clone --depth 1 https://github.com/microsoft/vcpkg.git $root
+            & "$root/bootstrap-vcpkg.bat" -disableMetrics
+          }
+          & "$root/vcpkg.exe" install "opencv4[jpeg,png,tiff]:x64-windows-static-md"
+          echo "VCPKG_ROOT=$root" >> $env:GITHUB_ENV
+          echo "OpenCV_DIR=$root/installed/x64-windows-static-md/share/opencv4" >> $env:GITHUB_ENV
           echo "VCPKGRS_TRIPLET=x64-windows-static-md" >> $env:GITHUB_ENV
 
       - name: Restaurer le SDK LUMIX

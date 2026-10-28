@@ -59,4 +59,7 @@ $env:TAURI_SIGNING_PRIVATE_KEY = Get-Content .secrets\tauri-updater.key -Raw
 yarn tauri build -- --bundles nsis --config src-tauri/tauri.release.conf.json
 ```
 
-Prérequis : `vendor/lumix-sdk/`, OpenCV vcpkg, LLVM (voir `AGENTS.md`).
+Prérequis : `vendor/lumix-sdk/`, OpenCV vcpkg, **LLVM/Clang ≥ 20** (voir `AGENTS.md`).
+Sur les runners `windows-2025` / VS 2026, Clang 18 fait échouer `opencv-binding-generator`
+(`STL1000`). La CI utilise LLVM 20.1.8 + cache vcpkg fichiers (`actions/cache`) —
+le backend `x-gha` de vcpkg a été retiré.
