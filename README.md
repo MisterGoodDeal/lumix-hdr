@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/MisterGoodDeal/lumix-hdr/actions/workflows/ci.yml/badge.svg)](https://github.com/MisterGoodDeal/lumix-hdr/actions/workflows/ci.yml)
 
+[![Release](https://github.com/MisterGoodDeal/lumix-hdr/actions/workflows/release.yml/badge.svg)](https://github.com/MisterGoodDeal/lumix-hdr/actions/workflows/release.yml)
+
 App de bureau pour bracketter un **Panasonic LUMIX GH6** en USB, fusionner les expo en HDR localement, et garder un historique des séances.
 
 Pilotage caméra = **Windows** + SDK LUMIX. La fusion JPEG marche partout (et en mode démo sans boîtier).
